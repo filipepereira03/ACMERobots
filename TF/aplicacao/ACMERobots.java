@@ -77,57 +77,88 @@ public class ACMERobots {
     }
 
     private JPanel createCadastrarRoboPanel() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridBagLayout());
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(new JLabel("Tela de cadastro de robôs", JLabel.CENTER), BorderLayout.NORTH);
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(5, 5, 5, 5);
-
+        JPanel panelForm = new JPanel(new GridLayout(7, 2, 5, 5));
         JLabel idLabel = new JLabel("ID:");
-        idLabel.setHorizontalAlignment(JLabel.RIGHT);
-        JTextField idField = new JTextField();
-        idField.setPreferredSize(new Dimension(100, 20));
-
+        JTextField idField = new JTextField(10);
         JLabel modeloLabel = new JLabel("Modelo:");
-        modeloLabel.setHorizontalAlignment(JLabel.RIGHT);
-        JTextField modeloField = new JTextField();
-        modeloField.setPreferredSize(new Dimension(100, 20));
-
-        JLabel nivelLabel = new JLabel("Nível (para Doméstico):");
-        nivelLabel.setHorizontalAlignment(JLabel.RIGHT);
-        JTextField nivelField = new JTextField();
-        nivelField.setPreferredSize(new Dimension(100, 20));
-
-        JLabel areaLabel = new JLabel("Área (para Agrícola):");
-        areaLabel.setHorizontalAlignment(JLabel.RIGHT);
-        JTextField areaField = new JTextField();
-        areaField.setPreferredSize(new Dimension(100, 20));
-
-        JLabel diasLabel = new JLabel("Dias de Locação:");
-        diasLabel.setHorizontalAlignment(JLabel.RIGHT);
-        JTextField diasField = new JTextField();
-        diasField.setPreferredSize(new Dimension(100, 20));
-
+        JTextField modeloField = new JTextField(10);
+        JLabel labelTipo = new JLabel("Tipo:");
+        JComboBox<String> comboTipo = new JComboBox<>(new String[]{"Doméstico", "Agrícola", "Industrial"});
+        JLabel nivelLabel = new JLabel("Nível (Doméstico):");
+        JTextField nivelField = new JTextField(10);
+        JLabel areaLabel = new JLabel("Área (Agrícola):");
+        JTextField areaField = new JTextField(10);
+        JLabel diasLabel = new JLabel("Dias de locação:");
+        JTextField diasField = new JTextField(10);
         JButton cadastrarButton = new JButton("Cadastrar");
+        JButton voltarButton = new JButton("Voltar");
+
+        panelForm.add(idLabel);
+        panelForm.add(idField);
+        panelForm.add(modeloLabel);
+        panelForm.add(modeloField);
+        panelForm.add(labelTipo);
+        panelForm.add(comboTipo);
+        panelForm.add(nivelLabel);
+        panelForm.add(nivelField);
+        panelForm.add(areaLabel);
+        panelForm.add(areaField);
+        panelForm.add(diasLabel);
+        panelForm.add(diasField);
+        panelForm.add(cadastrarButton);
+        panelForm.add(voltarButton);
+
+        panel.add(panelForm, BorderLayout.CENTER);
+
+        comboTipo.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String tipo = (String) comboTipo.getSelectedItem();
+                switch (tipo) {
+                    case "Doméstico":
+                        nivelField.setEnabled(true);
+                        areaField.setEnabled(false);
+                        break;
+                    case "Agrícola":
+                        nivelField.setEnabled(false);
+                        areaField.setEnabled(true);
+                        break;
+                    case "Industrial":
+                        nivelField.setEnabled(false);
+                        areaField.setEnabled(false);
+                        break;
+                }
+            }
+        });
+
+
         cadastrarButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
                     int id = Integer.parseInt(idField.getText());
                     String modelo = modeloField.getText();
-                    int dias = Integer.parseInt(diasField.getText());
-                    int nivel = Integer.parseInt(nivelField.getText());
-                    double area = Double.parseDouble(areaField.getText());
+                    String tipo = (String) comboTipo.getSelectedItem();
 
-                    cadastrarRobo(id, modelo, dias, nivel, area);
+                    int nivel = nivelField.isEnabled() ? Integer.parseInt(nivelField.getText()) : 0;
+                    double area = areaField.isEnabled() ? Double.parseDouble(areaField.getText()) : 0;
+                    int dias = Integer.parseInt(diasField.getText().trim());
+
+                    cadastrarRobo(id, modelo, tipo, dias, nivel, area);
+
+                    idField.setText("");
+                    modeloField.setText("");
+                    diasField.setText("");
+                    nivelField.setText("");
+                    areaField.setText("");
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(frame, "Por favor, insira valores válidos.", "Erro", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
-
-        JButton voltarButton = new JButton("Voltar");
         voltarButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -135,43 +166,8 @@ public class ACMERobots {
             }
         });
 
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        panel.add(idLabel, gbc);
-        gbc.gridx = 1;
-        panel.add(idField, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        panel.add(modeloLabel, gbc);
-        gbc.gridx = 1;
-        panel.add(modeloField, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        panel.add(nivelLabel, gbc);
-        gbc.gridx = 1;
-        panel.add(nivelField, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        panel.add(areaLabel, gbc);
-        gbc.gridx = 1;
-        panel.add(areaField, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 4;
-        panel.add(diasLabel, gbc);
-        gbc.gridx = 1;
-        panel.add(diasField, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 5;
-        gbc.gridwidth = 2;
-        panel.add(cadastrarButton, gbc);
-
-        gbc.gridy = 6;
-        panel.add(voltarButton, gbc);
+        nivelField.setEnabled(true);
+        areaField.setEnabled(false);
 
         return panel;
     }
@@ -179,8 +175,83 @@ public class ACMERobots {
 
     private JPanel createCadastrarClientePanel() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.add(new JLabel("Tela de cadastro de clientes"), BorderLayout.NORTH);
-        // Adicionar o cadastro aqui
+        panel.add(new JLabel("Tela de cadastro de clientes", JLabel.CENTER), BorderLayout.NORTH);
+        JPanel panelForm = new JPanel(new GridLayout(7, 2,5,5));
+        JLabel labelCodigo = new JLabel("Código:");
+        JTextField textCodigo = new JTextField(10);
+        JLabel labelNome = new JLabel("Nome:");
+        JTextField textNome = new JTextField(10);
+        JLabel labelTipo = new JLabel("Tipo:");
+        JComboBox<String> comboTipo = new JComboBox<>(new String[]{"Individual", "Empresarial"});
+        JLabel labelCPF = new JLabel("CPF (Individual):");
+        JTextField textCPF = new JTextField(10);
+        JLabel labelAno = new JLabel("Ano de Fundação (Empresarial):");
+        JTextField textAno = new JTextField(10);
+        JButton cadastrarButton = new JButton("Cadastrar");
+        JButton voltarButton = new JButton("Voltar");
+
+        panelForm.add(labelCodigo);
+        panelForm.add(textCodigo);
+        panelForm.add(labelNome);
+        panelForm.add(textNome);
+        panelForm.add(labelTipo);
+        panelForm.add(comboTipo);
+        panelForm.add(labelCPF);
+        panelForm.add(textCPF);
+        panelForm.add(labelAno);
+        panelForm.add(textAno);
+        panelForm.add(cadastrarButton);
+        panelForm.add(voltarButton);
+
+        panel.add(panelForm, BorderLayout.CENTER);
+
+        comboTipo.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String tipo = (String) comboTipo.getSelectedItem();
+                if ("Individual".equals(tipo)) {
+                    textCPF.setEnabled(true);
+                    textAno.setEnabled(false);
+                } else {
+                    textCPF.setEnabled(false);
+                    textAno.setEnabled(true);
+                }
+            }
+        });
+
+        cadastrarButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    int codigo = Integer.parseInt(textCodigo.getText().trim());
+                    String nome = textNome.getText().trim();
+                    String tipo = (String) comboTipo.getSelectedItem();
+
+                    String cpf = textCPF.getText().trim();
+                    int ano = tipo.equals("Empresarial") ? Integer.parseInt(textAno.getText().trim()) : 0;
+
+                    cadastrarCliente(codigo, nome, tipo, cpf, ano);
+
+                    textCodigo.setText("");
+                    textNome.setText("");
+                    textCPF.setText("");
+                    textAno.setText("");
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(frame, "Entrada inválida.", "Erro", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        voltarButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cards, "menu");
+            }
+        });
+
+        textCPF.setEnabled(true);
+        textAno.setEnabled(false);
+
         return panel;
     }
 
@@ -191,7 +262,7 @@ public class ACMERobots {
         return panel;
     }
 
-    private void cadastrarRobo(int id, String modelo, int dias, int nivel, double area) {
+    private void cadastrarRobo(int id, String modelo, String tipo,  int dias, int nivel, double area) {
 
         for (Robo r : robos) {
             if (r.getId() == id) {
@@ -200,36 +271,54 @@ public class ACMERobots {
             }
         }
 
-        // Tá dando erro pra calcular o valor final de locação em robos que n sejam o industrial. Boa sorte (:
         Robo novoRobo = null;
-        double valorDiario = 0.0;
-        if (nivel > 0) {
-            switch (nivel) {
-                case 1:
-                    valorDiario = 10.00;
-                    break;
-                case 2:
-                    valorDiario = 20.00;
-                    break;
-                case 3:
-                    valorDiario = 50.00;
-                    break;
-                default:
-                    JOptionPane.showMessageDialog(frame, "Nível inválido.", "Erro", JOptionPane.ERROR_MESSAGE);
-            }
-            novoRobo = new Domestico(id, modelo, valorDiario);
-        } else if (area > 0) {
-            valorDiario = 10.00 * area;
-            novoRobo = new Agricola(id, modelo, valorDiario, area);
-        } else {
-            valorDiario = 90.00;
-            novoRobo = new Industrial(id, modelo, valorDiario, "");
+        switch (tipo) {
+            case "Doméstico":
+                novoRobo = new Domestico(id, modelo, nivel);
+                break;
+            case "Agrícola":
+                novoRobo = new Agricola(id, modelo, area);
+                break;
+            case "Industrial":
+                novoRobo = new Industrial(id, modelo, "Setor");
+                break;
+            default:
+                JOptionPane.showMessageDialog(frame, "Tipo de robô inválido.", "Erro", JOptionPane.ERROR_MESSAGE);
+                return;
         }
 
-        robos.add(novoRobo);
-        double valorFinal = novoRobo.calculaLocacao(dias);
-        JOptionPane.showMessageDialog(frame, "Robo cadastrado com sucesso. Valor final da locação: " + novoRobo.calculaLocacao(dias) + " Sucesso");
+        if (novoRobo != null) {
+            robos.add(novoRobo);
+            double valorFinal = novoRobo.calculaLocacao(dias);
+            JOptionPane.showMessageDialog(frame, "Robo cadastrado com sucesso. Valor final da locação: " + valorFinal + " Sucesso");
+        } else {
+            JOptionPane.showMessageDialog(frame, "Erro ao cadastrar robô.", "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void cadastrarCliente(int codigo, String nome, String tipo, String cpf, int ano) {
+        for (Cliente c : clientes) {
+            if (c.getCodigo() == codigo) {
+                JOptionPane.showMessageDialog(frame, "Código já cadastrado.", "Erro", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        }
+
+        Cliente novoCliente;
+        if ("Individual".equals(tipo)) {
+            novoCliente = new Individual(codigo, nome, cpf);
+        } else {
+            novoCliente = new Empresarial(codigo, nome, ano);
+        }
+
+        if (novoCliente != null) {
+            clientes.add(novoCliente);
+        JOptionPane.showMessageDialog(frame, "Cliente cadastrado com sucesso.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(frame, "Erro ao cadastrar cliente.", "Erro", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }
+
 
 
