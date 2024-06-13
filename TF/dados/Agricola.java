@@ -6,14 +6,15 @@ public class Agricola extends Robo {
 
 	private String uso;
 
-	public Agricola(int id, String modelo, double valorDiario, double area) {
-		super(id, modelo, valorDiario);
+	public Agricola(int id, String modelo, double area) {
+		super(id, modelo, 0);
 		this.area = area;
 
 	}
 
 	@Override
 	public double calculaLocacao(int dias) {
-		return 10.00 * area * dias;
+		double valorDiario = 10.00 * area;
+		return valorDiario * dias;
 	}
 }
