@@ -1,9 +1,16 @@
 import aplicacao.ACMERobots ;
 
+import javax.swing.*;
+
 public class Main {
 
 	public static void main(String[] args) {
-		ACMERobots app = new ACMERobots();
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				new ACMERobots();
+			}
+		});
 	}
 
 }
