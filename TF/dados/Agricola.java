@@ -6,10 +6,10 @@ public class Agricola extends Robo {
 
 	private String uso;
 
-	public Agricola(int id, String modelo, double valorDiario, double area, String uso) {
+	public Agricola(int id, String modelo, double valorDiario, double area) {
 		super(id, modelo, valorDiario);
 		this.area = area;
-		this.uso = uso;
+
 	}
 
 	@Override
