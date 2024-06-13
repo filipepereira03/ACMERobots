@@ -258,8 +258,98 @@ public class ACMERobots {
     private JPanel createCadastrarLocacaoPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(new JLabel("Tela de cadastro de locações"), BorderLayout.NORTH);
-        // Adicionar o cadastro aqui
+
+        JPanel panelForm = new JPanel(new GridLayout(7, 2, 5, 5));
+        JLabel labelNumero = new JLabel("Número:");
+        JTextField textNumero = new JTextField(10);
+        JLabel labelCliente = new JLabel("Cliente:");
+        DefaultComboBoxModel<Cliente> clienteModel = new DefaultComboBoxModel<>();
+        for (Cliente c : clientes) {
+            clienteModel.addElement(c);
+        }
+        JComboBox<Cliente> comboCliente = new JComboBox<>(clienteModel);
+        JLabel labelRobo = new JLabel("Robô:");
+        DefaultComboBoxModel<Robo> roboModel = new DefaultComboBoxModel<>();
+        for (Robo r : robos) {
+            roboModel.addElement(r);
+        }
+        JComboBox<Robo> comboRobo = new JComboBox<>(roboModel);
+        JButton adicionarRoboButton = new JButton("Adicionar Robô");
+        JButton cadastrarButton = new JButton("Cadastrar");
+        JButton voltarButton = new JButton("Voltar");
+
+        panelForm.add(labelNumero);
+        panelForm.add(textNumero);
+        panelForm.add(labelCliente);
+        panelForm.add(comboCliente);
+        panelForm.add(labelRobo);
+        panelForm.add(comboRobo);
+        panelForm.add(adicionarRoboButton);
+        panelForm.add(cadastrarButton);
+        panelForm.add(voltarButton);
+
+        panel.add(panelForm, BorderLayout.CENTER);
+
+        ArrayList<Robo> robosLocacao = new ArrayList<>();
+
+        adicionarRoboButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Robo r = (Robo) comboRobo.getSelectedItem();
+                if (r != null) {
+                robosLocacao.add(r);
+                JOptionPane.showMessageDialog(frame, "Robô adicionado com sucesso.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        });
+
+        cadastrarButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    int numero = Integer.parseInt(textNumero.getText().trim());
+                    Cliente cliente = (Cliente) comboCliente.getSelectedItem();
+
+                    for (Locacao l : locacoes) {
+                        if (l.getNumero() == numero) {
+                            JOptionPane.showMessageDialog(frame, "Número de locação já cadastrado.", "Erro", JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+                    }
+
+                    Locacao locacao = new Locacao(numero, Status.CADASTRADA, null, 0, cliente, robosLocacao);
+                    locacoes.add(locacao);
+                    JOptionPane.showMessageDialog(frame, "Locação cadastrada com sucesso.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                    textNumero.setText("");
+                    robosLocacao.clear();
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(frame, "Entrada inválida.", "Erro", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        voltarButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cards, "menu");
+            }
+        });
+
         return panel;
+    }
+
+    private void updateRoboModel(DefaultComboBoxModel<Robo> model) {
+        model.removeAllElements();
+        for (Robo r : robos) {
+            model.addElement(r);
+        }
+    }
+
+    private void updateClienteModel(DefaultComboBoxModel<Cliente> model) {
+        model.removeAllElements();
+        for (Cliente c : clientes) {
+            model.addElement(c);
+        }
     }
 
     private void cadastrarRobo(int id, String modelo, String tipo,  int dias, int nivel, double area) {
@@ -289,6 +379,7 @@ public class ACMERobots {
 
         if (novoRobo != null) {
             robos.add(novoRobo);
+            updateRoboModel(robos);
             double valorFinal = novoRobo.calculaLocacao(dias);
             JOptionPane.showMessageDialog(frame, "Robo cadastrado com sucesso. Valor final da locação: " + valorFinal + " Sucesso");
         } else {
@@ -318,6 +409,7 @@ public class ACMERobots {
             JOptionPane.showMessageDialog(frame, "Erro ao cadastrar cliente.", "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
+
 }
 
 

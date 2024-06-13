@@ -1,8 +1,10 @@
 package dados;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Collection;
+import java.util.List;
 
 public class Locacao {
 
@@ -28,7 +30,22 @@ public class Locacao {
 	}
 
 	public double calculaValorFinal() {
-		return 0;
+		double valorLocacao = 0;
+		for (Robo r : robo) {
+			valorLocacao += r.calculaLocacao(calcularDias());
+		}
+		double desconto = cliente.calculaDesconto(robo.size());
+		double valorFinal = valorLocacao - (valorLocacao * desconto);
+		return Math.max(valorFinal, 0);
 	}
 
+	public int calcularDias() {
+		long diff = dataFim - dataInicio.getTime();
+		return (int) (diff / (1000 * 60 * 60 * 24));
+	}
+
+
+	public int getNumero() {
+		return numero;
+	}
 }

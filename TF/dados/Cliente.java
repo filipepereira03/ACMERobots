@@ -19,4 +19,7 @@ public abstract class Cliente {
 
 	public abstract double calculaDesconto(int quantidadeRobos);
 
+	public int getCodigo() {
+		return codigo;
+	}
 }
