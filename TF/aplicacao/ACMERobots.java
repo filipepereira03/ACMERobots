@@ -17,6 +17,8 @@ public class ACMERobots {
     private ArrayList<Robo> robos;
     private ArrayList<Cliente> clientes;
     private ArrayList<Locacao> locacoes;
+    private DefaultComboBoxModel<Robo> roboModel;
+    private DefaultComboBoxModel<Cliente> clienteModel;
 
     public ACMERobots() {
         robos = new ArrayList<>();
@@ -263,17 +265,17 @@ public class ACMERobots {
         JLabel labelNumero = new JLabel("Número:");
         JTextField textNumero = new JTextField(10);
         JLabel labelCliente = new JLabel("Cliente:");
-        DefaultComboBoxModel<Cliente> clienteModel = new DefaultComboBoxModel<>();
+
+        clienteModel = new DefaultComboBoxModel<>();
         for (Cliente c : clientes) {
             clienteModel.addElement(c);
         }
         JComboBox<Cliente> comboCliente = new JComboBox<>(clienteModel);
+
         JLabel labelRobo = new JLabel("Robô:");
-        DefaultComboBoxModel<Robo> roboModel = new DefaultComboBoxModel<>();
-        for (Robo r : robos) {
-            roboModel.addElement(r);
-        }
+        roboModel = new DefaultComboBoxModel<>();
         JComboBox<Robo> comboRobo = new JComboBox<>(roboModel);
+
         JButton adicionarRoboButton = new JButton("Adicionar Robô");
         JButton cadastrarButton = new JButton("Cadastrar");
         JButton voltarButton = new JButton("Voltar");
@@ -335,20 +337,21 @@ public class ACMERobots {
             }
         });
 
+
         return panel;
     }
 
-    private void updateRoboModel(DefaultComboBoxModel<Robo> model) {
-        model.removeAllElements();
+    private void updateRoboModel() {
+        roboModel.removeAllElements();
         for (Robo r : robos) {
-            model.addElement(r);
+            roboModel.addElement(r);
         }
     }
 
-    private void updateClienteModel(DefaultComboBoxModel<Cliente> model) {
-        model.removeAllElements();
+    private void updateClienteModel() {
+        clienteModel.removeAllElements();
         for (Cliente c : clientes) {
-            model.addElement(c);
+            clienteModel.addElement(c);
         }
     }
 
@@ -361,7 +364,7 @@ public class ACMERobots {
             }
         }
 
-        Robo novoRobo = null;
+        Robo novoRobo;
         switch (tipo) {
             case "Doméstico":
                 novoRobo = new Domestico(id, modelo, nivel);
@@ -377,14 +380,10 @@ public class ACMERobots {
                 return;
         }
 
-        if (novoRobo != null) {
-            robos.add(novoRobo);
-            updateRoboModel(robos);
-            double valorFinal = novoRobo.calculaLocacao(dias);
-            JOptionPane.showMessageDialog(frame, "Robo cadastrado com sucesso. Valor final da locação: " + valorFinal + " Sucesso");
-        } else {
-            JOptionPane.showMessageDialog(frame, "Erro ao cadastrar robô.", "Erro", JOptionPane.ERROR_MESSAGE);
-        }
+        robos.add(novoRobo);
+        updateRoboModel();
+        double valorFinal = novoRobo.calculaLocacao(dias);
+        JOptionPane.showMessageDialog(frame, "Robo cadastrado com sucesso. Valor final da locação: " + valorFinal + " Sucesso");
     }
 
     private void cadastrarCliente(int codigo, String nome, String tipo, String cpf, int ano) {
@@ -408,7 +407,10 @@ public class ACMERobots {
         } else {
             JOptionPane.showMessageDialog(frame, "Erro ao cadastrar cliente.", "Erro", JOptionPane.ERROR_MESSAGE);
         }
+
+        updateClienteModel();
     }
+
 
 }
 
