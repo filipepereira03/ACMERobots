@@ -19,6 +19,6 @@ public class Agricola extends Robo {
 	}
 
 	public String toString() {
-		return "Robo Agrícola " + super.toString();
+		return super.toString() + " - Agrícola - Área: " + area;
 	}
 }

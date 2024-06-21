@@ -53,11 +53,19 @@ public class Locacao {
 		return robo;
     }
 
-	public void setStatus(Status situacao) {
-		this.situacao = situacao;
+	public void setStatus(Status novaSituacao) {
+		if (this.situacao == Status.FINALIZADA || this.situacao == Status.CANCELADA) {
+			throw new IllegalStateException("Não é possível alterar a situação de uma locação finalizada ou cancelada.");
+		}
+
+		this.situacao = novaSituacao;
 	}
 
 	public Status getStatus() {
 		return situacao;
+	}
+
+	public String toString() {
+		return "Locação #: " + numero + " - " + situacao + " - " + "Cliente: " +cliente.getNome();
 	}
 }

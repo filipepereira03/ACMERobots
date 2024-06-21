@@ -20,7 +20,7 @@ public class Empresarial extends Cliente {
 	}
 
 	public String toString() {
-		return "Cliente empresarial " +super.toString();
+		return super.toString() + " - Empresarial - Ano de fundação: " + ano;
 	}
 }
 

@@ -21,6 +21,7 @@ public class ACMERobots {
     private ArrayList<Locacao> locacoes;
     private DefaultComboBoxModel<Robo> roboModel;
     private DefaultComboBoxModel<Cliente> clienteModel;
+    private DefaultComboBoxModel<Locacao> locacaoModel;
     private ArrayList<Robo> robosSelecionados;
 
     public ACMERobots() {
@@ -335,6 +336,7 @@ public class ACMERobots {
 
                     Locacao locacao = new Locacao(numero, Status.CADASTRADA, null, 0, cliente, robosLocacao);
                     locacoes.add(locacao);
+                    updateLocacaoModel();
                     robosSelecionados.clear();
                     JOptionPane.showMessageDialog(frame, "Locação cadastrada com sucesso.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
                     textNumero.setText("");
@@ -363,6 +365,12 @@ public class ACMERobots {
         JButton processarButton = new JButton("Processar locação");
         JButton voltarButton = new JButton("Voltar");
 
+        locacaoModel = new DefaultComboBoxModel<>();
+        for (Locacao l : locacoes) {
+            locacaoModel.addElement(l);
+        }
+        JComboBox<Locacao> comboLocacao = new JComboBox<>(locacaoModel);
+
         processarButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -378,6 +386,7 @@ public class ACMERobots {
         });
 
         JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 5, 5));
+        buttonPanel.add(comboLocacao);
         buttonPanel.add(processarButton);
         buttonPanel.add(voltarButton);
 
@@ -397,6 +406,13 @@ public class ACMERobots {
         clienteModel.removeAllElements();
         for (Cliente c : clientes) {
             clienteModel.addElement(c);
+        }
+    }
+
+    private void updateLocacaoModel() {
+        locacaoModel.removeAllElements();
+        for (Locacao l : locacoes) {
+            locacaoModel.addElement(l);
         }
     }
 
@@ -457,37 +473,38 @@ public class ACMERobots {
     }
 
     private void processarLocacoes() {
-        Iterator<Locacao> it = locacoes.iterator();
+        if (locacoes.isEmpty()) {
+            JOptionPane.showMessageDialog(frame, "Nenhuma locação cadastrada.", "Erro", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
-        while (it.hasNext()) {
-            Locacao loc = it.next();
-            if (loc.getStatus().equals(Status.CADASTRADA)) {
-                List<Robo> robosSolicitados = loc.getRobos();
+        Locacao loc = (Locacao) locacaoModel.getSelectedItem();
+        if (loc == null) {
+            JOptionPane.showMessageDialog(frame, "Selecione uma locação para processar.", "Erro", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
-                boolean todosDisponiveis = robosSolicitados.stream()
-                        .allMatch(Robo::estaDisponivel);
+        if (loc.getStatus().equals(Status.CADASTRADA)) {
+            List<Robo> robosSolicitados = loc.getRobos();
+            boolean todosDisponiveis = robosSolicitados.stream().allMatch(Robo::estaDisponivel);
 
-                if (todosDisponiveis) {
-                    robosSolicitados.forEach(Robo::locar);
-                    loc.setStatus(Status.EXECUTANDO);
-                } else {
-                    robosSolicitados.stream()
-                            .filter(Robo::estaLocado)
-                            .forEach(Robo::liberar);
-                    loc.setStatus(Status.CADASTRADA);
-                }
+            if (todosDisponiveis) {
+                robosSolicitados.forEach(Robo::locar);
+                loc.setStatus(Status.EXECUTANDO);
+                JOptionPane.showMessageDialog(frame, "Locação processada com sucesso.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                robosSolicitados.stream().filter(Robo::estaLocado).forEach(Robo::liberar);
+                loc.setStatus(Status.CADASTRADA);
+                JOptionPane.showMessageDialog(frame, "Alguns robôs não estão disponíveis.", "Erro", JOptionPane.ERROR_MESSAGE);
             }
-        }
-
-        if (locacoes.stream().noneMatch(l -> l.getStatus().equals(Status.CADASTRADA))) {
-            JOptionPane.showMessageDialog(frame, "Erro ao processar locações.", "Erro", JOptionPane.ERROR_MESSAGE);
         } else {
-            JOptionPane.showMessageDialog(frame, "Locações processadas com sucesso.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(frame, "Locação não está no status 'Cadastrada'.", "Erro", JOptionPane.ERROR_MESSAGE);
         }
+
+        updateLocacaoModel();
     }
-
-
 }
+
 
 
 

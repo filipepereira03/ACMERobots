@@ -15,6 +15,6 @@ public class Industrial extends Robo {
 	}
 
 	public String toString() {
-		return "Robo industrial " + super.toString();
+		return super.toString() + " - Industrial - Setor: " + setor;
 	}
 }

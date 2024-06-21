@@ -3,6 +3,7 @@ package dados;
 public class Individual extends Cliente {
 
 	private String cpf;
+	private Cliente cliente;
 
 	public Individual(int codigo, String nome, String cpf) {
 		super(codigo, nome);
@@ -17,7 +18,9 @@ public class Individual extends Cliente {
 		return 0.00;
 	}
 
+
+
 	public String toString() {
-		return "Cliente individual " + super.toString();
+		return super.toString() + " - Individual - CPF: " + cpf;
 	}
 }

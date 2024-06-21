@@ -20,6 +20,6 @@ public class Domestico extends Robo {
     }
 
     public String toString() {
-        return "Robo Doméstico " + super.toString();
+        return super.toString() + " - Doméstico - Nível: " + nivel;
     }
 }

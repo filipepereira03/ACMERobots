@@ -23,7 +23,11 @@ public abstract class Cliente {
 		return codigo;
 	}
 
+	public String getNome() {
+		return nome;
+	}
+
 	public String toString() {
-		return "Código: " + codigo + ", " + "Nome: " + nome;
+		return "Cliente # " + codigo + " - " + nome;
 	}
 }

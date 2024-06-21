@@ -73,6 +73,6 @@ public abstract class Robo {
 	}
 
 	public String toString() {
-		return "Id=" + id;
+		return "Robo # " + id + " - " + modelo;
 	}
 }
