@@ -19,11 +19,13 @@ public class ACMERobots {
     private ArrayList<Locacao> locacoes;
     private DefaultComboBoxModel<Robo> roboModel;
     private DefaultComboBoxModel<Cliente> clienteModel;
+    private ArrayList<Robo> robosSelecionados;
 
     public ACMERobots() {
         robos = new ArrayList<>();
         clientes = new ArrayList<>();
         locacoes = new ArrayList<>();
+        robosSelecionados = new ArrayList<>();
 
         initGUI();
     }
@@ -299,7 +301,7 @@ public class ACMERobots {
             public void actionPerformed(ActionEvent e) {
                 Robo r = (Robo) comboRobo.getSelectedItem();
                 if (r != null) {
-                robosLocacao.add(r);
+                robosSelecionados.add(r);
                 JOptionPane.showMessageDialog(frame, "Robô adicionado com sucesso.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
                 }
             }
@@ -321,6 +323,7 @@ public class ACMERobots {
 
                     Locacao locacao = new Locacao(numero, Status.CADASTRADA, null, 0, cliente, robosLocacao);
                     locacoes.add(locacao);
+                    robosSelecionados.clear();
                     JOptionPane.showMessageDialog(frame, "Locação cadastrada com sucesso.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
                     textNumero.setText("");
                     robosLocacao.clear();

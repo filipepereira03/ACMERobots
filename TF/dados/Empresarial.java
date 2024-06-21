@@ -18,5 +18,9 @@ public class Empresarial extends Cliente {
 		}
 		return 0.00;
 	}
+
+	public String toString() {
+		return "Cliente empresarial " +super.toString();
+	}
 }
 

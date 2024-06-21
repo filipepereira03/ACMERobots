@@ -53,4 +53,7 @@ public abstract class Robo {
 
 	public abstract double calculaLocacao(int dias);
 
+	public String toString() {
+		return "Id=" + id;
+	}
 }

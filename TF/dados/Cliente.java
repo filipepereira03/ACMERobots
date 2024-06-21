@@ -22,4 +22,8 @@ public abstract class Cliente {
 	public int getCodigo() {
 		return codigo;
 	}
+
+	public String toString() {
+		return "Código: " + codigo + ", " + "Nome: " + nome;
+	}
 }

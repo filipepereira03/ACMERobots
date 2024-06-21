@@ -17,4 +17,8 @@ public class Agricola extends Robo {
 		double valorDiario = 10.00 * area;
 		return valorDiario * dias;
 	}
+
+	public String toString() {
+		return "Robo Agrícola " + super.toString();
+	}
 }

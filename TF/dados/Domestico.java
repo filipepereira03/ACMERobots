@@ -18,4 +18,8 @@ public class Domestico extends Robo {
         };
         return valorDiario * dias;
     }
+
+    public String toString() {
+        return "Robo Doméstico " + super.toString();
+    }
 }

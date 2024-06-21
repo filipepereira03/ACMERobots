@@ -13,4 +13,8 @@ public class Industrial extends Robo {
 	public double calculaLocacao(int dias) {
 		return getValorDiario() * dias;
 	}
+
+	public String toString() {
+		return "Robo industrial " + super.toString();
+	}
 }
