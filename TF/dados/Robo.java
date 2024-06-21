@@ -12,11 +12,14 @@ public abstract class Robo {
 
 	private ArrayList<Locacao> locacao;
 
+	private boolean disponivel;
+
 	public Robo(int id, String modelo, double valorDiario) {
 		this.id = id;
 		this.modelo = modelo;
 		this.valorDiario = valorDiario;
 		locacao = new ArrayList<Locacao>();
+		this.disponivel = true;
 	}
 
 	public int getId() {
@@ -52,6 +55,22 @@ public abstract class Robo {
 	}
 
 	public abstract double calculaLocacao(int dias);
+
+	public boolean estaDisponivel() {
+		return disponivel;
+	}
+
+	public void locar() {
+		this.disponivel = false;
+	}
+
+	public void liberar() {
+		this.disponivel = true;
+	}
+
+	public boolean estaLocado() {
+		return !disponivel;
+	}
 
 	public String toString() {
 		return "Id=" + id;

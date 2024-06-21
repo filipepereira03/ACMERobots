@@ -7,6 +7,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -42,12 +44,14 @@ public class ACMERobots {
         JButton cadastrarRobo = new JButton("Cadastrar Robo");
         JButton cadastrarCliente = new JButton("Cadastrar Cliente");
         JButton cadastrarLocacao = new JButton("Cadastrar Locação");
+        JButton processarLoc = new JButton("Processar Locação");
 
         panelMenu.add(new JLabel("Bem vindo à ACMERobots"), BorderLayout.NORTH);
         JPanel buttonsPanel = new JPanel(new GridLayout(3, 1));
         buttonsPanel.add(cadastrarRobo);
         buttonsPanel.add(cadastrarCliente);
         buttonsPanel.add(cadastrarLocacao);
+        buttonsPanel.add(processarLoc);
         panelMenu.add(buttonsPanel, BorderLayout.CENTER);
 
         cadastrarRobo.addActionListener(new ActionListener() {
@@ -71,10 +75,18 @@ public class ACMERobots {
             }
         });
 
+        processarLoc.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cards, "processarLocacao");
+            }
+        });
+
         cards.add(panelMenu, "menu");
         cards.add(createCadastrarRoboPanel(), "cadastrarRobo");
         cards.add(createCadastrarClientePanel(), "cadastrarCliente");
         cards.add(createCadastrarLocacaoPanel(), "cadastrarLocacao");
+        cards.add(createProcessarLocacaoPanel(), "processarLocacao");
 
         frame.add(cards);
         frame.setVisible(true);
@@ -344,6 +356,36 @@ public class ACMERobots {
         return panel;
     }
 
+    private JPanel createProcessarLocacaoPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(new JLabel("Tela de processamento de locações"), BorderLayout.NORTH);
+
+        JButton processarButton = new JButton("Processar locação");
+        JButton voltarButton = new JButton("Voltar");
+
+        processarButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                processarLocacoes();
+            }
+        });
+
+        voltarButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cards, "menu");
+            }
+        });
+
+        JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 5, 5));
+        buttonPanel.add(processarButton);
+        buttonPanel.add(voltarButton);
+
+        panel.add(buttonPanel, BorderLayout.CENTER);
+
+        return panel;
+    }
+
     private void updateRoboModel() {
         roboModel.removeAllElements();
         for (Robo r : robos) {
@@ -412,6 +454,36 @@ public class ACMERobots {
         }
 
         updateClienteModel();
+    }
+
+    private void processarLocacoes() {
+        Iterator<Locacao> it = locacoes.iterator();
+
+        while (it.hasNext()) {
+            Locacao loc = it.next();
+            if (loc.getStatus().equals(Status.CADASTRADA)) {
+                List<Robo> robosSolicitados = loc.getRobos();
+
+                boolean todosDisponiveis = robosSolicitados.stream()
+                        .allMatch(Robo::estaDisponivel);
+
+                if (todosDisponiveis) {
+                    robosSolicitados.forEach(Robo::locar);
+                    loc.setStatus(Status.EXECUTANDO);
+                } else {
+                    robosSolicitados.stream()
+                            .filter(Robo::estaLocado)
+                            .forEach(Robo::liberar);
+                    loc.setStatus(Status.CADASTRADA);
+                }
+            }
+        }
+
+        if (locacoes.stream().noneMatch(l -> l.getStatus().equals(Status.CADASTRADA))) {
+            JOptionPane.showMessageDialog(frame, "Erro ao processar locações.", "Erro", JOptionPane.ERROR_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(frame, "Locações processadas com sucesso.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+        }
     }
 
 

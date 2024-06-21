@@ -48,4 +48,16 @@ public class Locacao {
 	public int getNumero() {
 		return numero;
 	}
+
+    public List<Robo> getRobos() {
+		return robo;
+    }
+
+	public void setStatus(Status situacao) {
+		this.situacao = situacao;
+	}
+
+	public Status getStatus() {
+		return situacao;
+	}
 }
