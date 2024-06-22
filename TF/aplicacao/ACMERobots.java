@@ -200,6 +200,8 @@ public class ACMERobots {
         return panel;
     }
 
+    // Arrumar as locações dos robôs domésticos e agrícolas que não estão contando, ficam aparecendo como 0
+    // O toString do robo doméstico tá dando nível 0 independente do que for colocado
 
     private JPanel createCadastrarClientePanel() {
         JPanel panel = new JPanel(new BorderLayout());
@@ -283,6 +285,8 @@ public class ACMERobots {
         return panel;
     }
 
+    // Arrumar o botão de adicionar robôs, que acho que não está fazendo nada
+    // Tentar fazer o JCombo limpar os robôs que foram adicionados já
     private JPanel createCadastrarLocacaoPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(new JLabel("Tela de cadastro de locações"), BorderLayout.NORTH);
@@ -406,7 +410,8 @@ public class ACMERobots {
         return panel;
     }
 
-    //Painel criado, só precisa ver pq n ta aparecendo os dados cadastrados
+    //Painel criado, só precisa ver pq n ta aparecendo os dados cadastrados (Veja o método mostrarRelatorioGeral)
+    //Se possível ajeitar o layout da tela.
     private JPanel createRelatorioGeralPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(new JLabel("Relatório Geral"), BorderLayout.NORTH);
@@ -539,6 +544,7 @@ public class ACMERobots {
         updateLocacaoModel();
     }
 
+    // Checar esse código, que aqui provávelmente que tá dando ruim na exibição dos dados
     private void mostrarRelatorioGeral() {
         JTextArea textArea = new JTextArea();
         textArea.setEditable(false);
