@@ -46,6 +46,7 @@ public class ACMERobots {
         JButton cadastrarCliente = new JButton("Cadastrar Cliente");
         JButton cadastrarLocacao = new JButton("Cadastrar Locação");
         JButton processarLoc = new JButton("Processar Locação");
+        JButton mostrarRelatorioGeral = new JButton("Relatório Geral");
 
         panelMenu.add(new JLabel("Bem vindo à ACMERobots"), BorderLayout.NORTH);
         JPanel buttonsPanel = new JPanel(new GridLayout(3, 1));
@@ -53,6 +54,7 @@ public class ACMERobots {
         buttonsPanel.add(cadastrarCliente);
         buttonsPanel.add(cadastrarLocacao);
         buttonsPanel.add(processarLoc);
+        buttonsPanel.add(mostrarRelatorioGeral);
         panelMenu.add(buttonsPanel, BorderLayout.CENTER);
 
         cadastrarRobo.addActionListener(new ActionListener() {
@@ -83,11 +85,20 @@ public class ACMERobots {
             }
         });
 
+        mostrarRelatorioGeral.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                 cardLayout.show(cards, "relatorioGeral");
+                 mostrarRelatorioGeral();
+            }
+        });
+
         cards.add(panelMenu, "menu");
         cards.add(createCadastrarRoboPanel(), "cadastrarRobo");
         cards.add(createCadastrarClientePanel(), "cadastrarCliente");
         cards.add(createCadastrarLocacaoPanel(), "cadastrarLocacao");
         cards.add(createProcessarLocacaoPanel(), "processarLocacao");
+        cards.add(createRelatorioGeralPanel(), "relatorioGeral");
 
         frame.add(cards);
         frame.setVisible(true);
@@ -395,6 +406,30 @@ public class ACMERobots {
         return panel;
     }
 
+    //Painel criado, só precisa ver pq n ta aparecendo os dados cadastrados
+    private JPanel createRelatorioGeralPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(new JLabel("Relatório Geral"), BorderLayout.NORTH);
+
+        JTextArea textArea = new JTextArea();
+        textArea.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(textArea);
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        JButton voltarButton = new JButton("Voltar");
+        voltarButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cards, "menu");
+            }
+        });
+        panel.add(voltarButton, BorderLayout.SOUTH);
+
+
+
+        return panel;
+    }
+
     private void updateRoboModel() {
         roboModel.removeAllElements();
         for (Robo r : robos) {
@@ -503,6 +538,49 @@ public class ACMERobots {
 
         updateLocacaoModel();
     }
+
+    private void mostrarRelatorioGeral() {
+        JTextArea textArea = new JTextArea();
+        textArea.setEditable(false);
+        StringBuilder relatorio = new StringBuilder();
+
+        if (robos.isEmpty() && clientes.isEmpty() && locacoes.isEmpty()) {
+            JOptionPane.showMessageDialog(frame, "Nenhum dado cadastrado.", "Erro", JOptionPane.ERROR_MESSAGE);
+            textArea.setText("");
+            return;
+        }
+
+        relatorio.append("Robôs:\n");
+        if (robos.isEmpty()) {
+            relatorio.append("Nenhum robô cadastrado.\n");
+        } else {
+            for (Robo r : robos) {
+                relatorio.append(r.toString()).append("\n");
+            }
+        }
+
+        relatorio.append("\nClientes:\n");
+        if (clientes.isEmpty()) {
+            relatorio.append("Nenhum cliente cadastrado.\n");
+        } else {
+            for (Cliente c : clientes) {
+                relatorio.append(c.toString()).append("\n");
+            }
+        }
+
+        relatorio.append("\nLocações:\n");
+        if (locacoes.isEmpty()) {
+            relatorio.append("Nenhuma locação cadastrada.\n");
+        } else {
+            for (Locacao l : locacoes) {
+                relatorio.append(l.toString()).append("\n");
+            }
+        }
+
+        textArea.setText(relatorio.toString());
+    }
+
+
 }
 
 
