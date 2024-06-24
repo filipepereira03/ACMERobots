@@ -167,10 +167,31 @@ public class ACMERobots {
                 try {
                     int id = Integer.parseInt(idField.getText());
                     String modelo = modeloField.getText();
+                    if (modelo.isEmpty()) {
+                        JOptionPane.showMessageDialog(frame, "Campo modelo é obrigatório.", "Erro", JOptionPane.ERROR_MESSAGE);
+                        modeloField.setText("");
+                        return;
+                    }
                     String tipo = (String) comboTipo.getSelectedItem();
 
-                    int nivel = nivelField.isEnabled() ? Integer.parseInt(nivelField.getText()) : 0;
-                    double area = areaField.isEnabled() ? Double.parseDouble(areaField.getText()) : 0;
+                    int nivel = 0;
+                    if (nivelField.isEnabled()) {
+                        nivel = Integer.parseInt(nivelField.getText().trim());
+                        if (nivel < 1 || nivel > 3) {
+                            JOptionPane.showMessageDialog(frame, "Nível inválido.", "Erro", JOptionPane.ERROR_MESSAGE);
+                            nivelField.setText("");
+                            return;
+                        }
+                    }
+                    double area = 0;
+                    if (areaField.isEnabled()) {
+                        area = Double.parseDouble(areaField.getText().trim());
+                        if (area <= 0) {
+                            JOptionPane.showMessageDialog(frame, "Área inválida.", "Erro", JOptionPane.ERROR_MESSAGE);
+                            areaField.setText("");
+                            return;
+                        }
+                    }
                     int dias = Integer.parseInt(diasField.getText().trim());
 
                     cadastrarRobo(id, modelo, tipo, dias, nivel, area);
@@ -182,6 +203,11 @@ public class ACMERobots {
                     areaField.setText("");
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(frame, "Por favor, insira valores válidos.", "Erro", JOptionPane.ERROR_MESSAGE);
+                    idField.setText("");
+                    modeloField.setText("");
+                    diasField.setText("");
+                    nivelField.setText("");
+                    areaField.setText("");
                 }
             }
         });
@@ -250,9 +276,24 @@ public class ACMERobots {
                 try {
                     int codigo = Integer.parseInt(textCodigo.getText().trim());
                     String nome = textNome.getText().trim();
+                    if (nome.isEmpty()) {
+                        JOptionPane.showMessageDialog(frame, "Campo nome é obrigatório.", "Erro", JOptionPane.ERROR_MESSAGE);
+                        textNome.setText("");
+                        return;
+                    }
                     String tipo = (String) comboTipo.getSelectedItem();
 
-                    String cpf = textCPF.getText().trim();
+                    String cpf = "";
+                    if (textCPF.isEnabled()) {
+                        cpf = textCPF.getText().trim();
+                        if (cpf.length() == 11 && cpf.matches("[0-9]+")) {
+                        cpf = cpf.substring(0, 3) + "." + cpf.substring(3, 6) + "." + cpf.substring(6, 9) + "-" + cpf.substring(9);
+                    } else {
+                        JOptionPane.showMessageDialog(frame, "CPF inválido.", "Erro", JOptionPane.ERROR_MESSAGE);
+                        textCPF.setText("");
+                        return;
+                        }
+                    }
                     int ano = tipo.equals("Empresarial") ? Integer.parseInt(textAno.getText().trim()) : 0;
 
                     cadastrarCliente(codigo, nome, tipo, cpf, ano);
@@ -263,6 +304,10 @@ public class ACMERobots {
                     textAno.setText("");
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(frame, "Entrada inválida.", "Erro", JOptionPane.ERROR_MESSAGE);
+                    textCodigo.setText("");
+                    textNome.setText("");
+                    textCPF.setText("");
+                    textAno.setText("");
                 }
             }
         });
@@ -337,6 +382,16 @@ public class ACMERobots {
                 try {
                     int numero = Integer.parseInt(textNumero.getText().trim());
                     Cliente cliente = (Cliente) comboCliente.getSelectedItem();
+
+                    if (clientes.isEmpty()) {
+                        JOptionPane.showMessageDialog(frame, "Selecione um cliente.", "Erro", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
+                    if (robosSelecionados.isEmpty()) {
+                        JOptionPane.showMessageDialog(frame, "Adicione pelo menos um robô.", "Erro", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
 
                     for (Locacao l : locacoes) {
                         if (l.getNumero() == numero) {
@@ -546,7 +601,7 @@ public class ACMERobots {
 
         if (robos.isEmpty() && clientes.isEmpty() && locacoes.isEmpty()) {
             JOptionPane.showMessageDialog(frame, "Nenhum dado cadastrado.", "Erro", JOptionPane.ERROR_MESSAGE);
-            relatorioText.setText("");
+            cardLayout.show(cards, "menu");
             return;
         }
 
