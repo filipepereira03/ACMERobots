@@ -6,16 +6,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 public class ACMERobots {
     private JFrame frame;
     private JPanel cards;
     private CardLayout cardLayout;
+    private JTextArea relatorioText;
     private ArrayList<Robo> robos;
     private ArrayList<Cliente> clientes;
     private ArrayList<Locacao> locacoes;
@@ -199,9 +197,6 @@ public class ACMERobots {
 
         return panel;
     }
-
-    // Arrumar as locações dos robôs domésticos e agrícolas que não estão contando, ficam aparecendo como 0
-    // O toString do robo doméstico tá dando nível 0 independente do que for colocado
 
     private JPanel createCadastrarClientePanel() {
         JPanel panel = new JPanel(new BorderLayout());
@@ -410,15 +405,14 @@ public class ACMERobots {
         return panel;
     }
 
-    //Painel criado, só precisa ver pq n ta aparecendo os dados cadastrados (Veja o método mostrarRelatorioGeral)
-    //Se possível ajeitar o layout da tela.
+
     private JPanel createRelatorioGeralPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(new JLabel("Relatório Geral"), BorderLayout.NORTH);
 
-        JTextArea textArea = new JTextArea();
-        textArea.setEditable(false);
-        JScrollPane scrollPane = new JScrollPane(textArea);
+        relatorioText = new JTextArea();
+        relatorioText.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(relatorioText);
         panel.add(scrollPane, BorderLayout.CENTER);
 
         JButton voltarButton = new JButton("Voltar");
@@ -484,7 +478,7 @@ public class ACMERobots {
         robos.add(novoRobo);
         updateRoboModel();
         double valorFinal = novoRobo.calculaLocacao(dias);
-        JOptionPane.showMessageDialog(frame, "Robo cadastrado com sucesso. Valor final da locação: " + valorFinal + " Sucesso");
+        JOptionPane.showMessageDialog(frame, "Robo cadastrado com sucesso. " +valorFinal);
     }
 
     private void cadastrarCliente(int codigo, String nome, String tipo, String cpf, int ano) {
@@ -544,15 +538,14 @@ public class ACMERobots {
         updateLocacaoModel();
     }
 
-    // Checar esse código, que aqui provávelmente que tá dando ruim na exibição dos dados
+
     private void mostrarRelatorioGeral() {
-        JTextArea textArea = new JTextArea();
-        textArea.setEditable(false);
+
         StringBuilder relatorio = new StringBuilder();
 
         if (robos.isEmpty() && clientes.isEmpty() && locacoes.isEmpty()) {
             JOptionPane.showMessageDialog(frame, "Nenhum dado cadastrado.", "Erro", JOptionPane.ERROR_MESSAGE);
-            textArea.setText("");
+            relatorioText.setText("");
             return;
         }
 
@@ -560,7 +553,9 @@ public class ACMERobots {
         if (robos.isEmpty()) {
             relatorio.append("Nenhum robô cadastrado.\n");
         } else {
-            for (Robo r : robos) {
+            List<Robo> robosOrdenados = new ArrayList<>(robos);
+            robosOrdenados.sort(Comparator.comparing(Robo::getId));
+            for (Robo r : robosOrdenados) {
                 relatorio.append(r.toString()).append("\n");
             }
         }
@@ -569,7 +564,9 @@ public class ACMERobots {
         if (clientes.isEmpty()) {
             relatorio.append("Nenhum cliente cadastrado.\n");
         } else {
-            for (Cliente c : clientes) {
+            List<Cliente> clientesOrdenados = new ArrayList<>(clientes);
+            clientesOrdenados.sort(Comparator.comparing(Cliente::getCodigo));
+            for (Cliente c : clientesOrdenados) {
                 relatorio.append(c.toString()).append("\n");
             }
         }
@@ -578,12 +575,13 @@ public class ACMERobots {
         if (locacoes.isEmpty()) {
             relatorio.append("Nenhuma locação cadastrada.\n");
         } else {
-            for (Locacao l : locacoes) {
+            List<Locacao> locacoesOrdenadas = new ArrayList<>(locacoes);
+            locacoesOrdenadas.sort(Comparator.comparing(Locacao::getNumero));
+            for (Locacao l : locacoesOrdenadas) {
                 relatorio.append(l.toString()).append("\n");
             }
         }
-
-        textArea.setText(relatorio.toString());
+        relatorioText.setText(relatorio.toString());
     }
 
 

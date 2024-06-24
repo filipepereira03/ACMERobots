@@ -6,16 +6,26 @@ public class Domestico extends Robo {
 
 	public Domestico(int id, String modelo, int nivel) {
 		super(id, modelo, 0);
+        this.nivel = nivel;
     }
 
 	@Override
 	public double calculaLocacao(int dias) {
-        double valorDiario = switch (nivel) {
-            case 1 -> 10.00 * dias;
-            case 2 -> 20.00 * dias;
-            case 3 -> 50.00 * dias;
-            default -> 0.00;
-        };
+        double valorDiario;
+        switch (nivel) {
+            case 1:
+                valorDiario = 10.00;
+                break;
+            case 2:
+                valorDiario = 20.00;
+                break;
+            case 3:
+                valorDiario = 50.00;
+                break;
+            default:
+                valorDiario = 0.00;
+                break;
+        }
         return valorDiario * dias;
     }
 
