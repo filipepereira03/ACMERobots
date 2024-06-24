@@ -325,6 +325,7 @@ public class ACMERobots {
                 Robo r = (Robo) comboRobo.getSelectedItem();
                 if (r != null) {
                 robosSelecionados.add(r);
+                roboModel.removeElement(r);
                 JOptionPane.showMessageDialog(frame, "Robô adicionado com sucesso.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
                 }
             }
