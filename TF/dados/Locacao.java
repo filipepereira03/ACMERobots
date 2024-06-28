@@ -18,30 +18,33 @@ public class Locacao {
 
 	private Cliente cliente;
 
-	private ArrayList<Robo> robo;
+	private ArrayList<Robo> roboLista;
 
-	public Locacao(int numero, Status situacao, Date dataInicio, int dataFim, Cliente cliente, Collection<Robo> robo) {
+	public Locacao(int numero, Status situacao, Date dataInicio, int dataFim, Cliente cliente, ArrayList<Robo> roboLista) {
 		this.numero = numero;
 		this.situacao = Status.CADASTRADA;
 		this.dataInicio = new Date();
 		this.dataFim = dataFim;
 		this.cliente = cliente;
-		this.robo = new ArrayList<>();
-	}
+		this.roboLista = new ArrayList<>(roboLista);
+    }
 
 	public double calculaValorFinal() {
 		double valorLocacao = 0;
-		for (Robo r : robo) {
-			valorLocacao += r.calculaLocacao(calcularDias());
+		for (Robo r : roboLista) {
+			double valorRobo = r.calculaLocacao(calcularDias());
+			valorLocacao += valorRobo;
 		}
-		double desconto = cliente.calculaDesconto(robo.size());
+		double desconto = cliente.calculaDesconto(roboLista.size());
 		double valorFinal = valorLocacao - (valorLocacao * desconto);
 		return Math.max(valorFinal, 0);
 	}
 
 	public int calcularDias() {
-		long diff = dataFim - dataInicio.getTime();
-		return (int) (diff / (1000 * 60 * 60 * 24));
+		long diff = dataFim - (dataInicio.getTime() / (1000 * 60 * 60 * 24));
+		int dias = (int) diff;
+		System.out.println("Dias: " + dias);
+		return dias;
 	}
 
 
@@ -49,8 +52,8 @@ public class Locacao {
 		return numero;
 	}
 
-    public List<Robo> getRobos() {
-		return robo;
+    public ArrayList<Robo> getRobos() {
+		return roboLista;
     }
 
 	public void setStatus(Status novaSituacao) {
@@ -67,5 +70,9 @@ public class Locacao {
 
 	public String toString() {
 		return "Locação #: " + numero + " - " + situacao + " - " + "Cliente: " +cliente.getNome();
+	}
+
+	public Cliente getCliente() {
+		return cliente;
 	}
 }

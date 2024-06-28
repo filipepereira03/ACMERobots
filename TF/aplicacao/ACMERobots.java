@@ -14,6 +14,7 @@ public class ACMERobots {
     private JPanel cards;
     private CardLayout cardLayout;
     private JTextArea relatorioText;
+    private JTextArea locacoesText;
     private ArrayList<Robo> robos;
     private ArrayList<Cliente> clientes;
     private ArrayList<Locacao> locacoes;
@@ -21,13 +22,15 @@ public class ACMERobots {
     private DefaultComboBoxModel<Cliente> clienteModel;
     private DefaultComboBoxModel<Locacao> locacaoModel;
     private ArrayList<Robo> robosSelecionados;
+    private ArrayList<Robo> robosDisponiveis;
+
 
     public ACMERobots() {
         robos = new ArrayList<>();
         clientes = new ArrayList<>();
         locacoes = new ArrayList<>();
         robosSelecionados = new ArrayList<>();
-
+        robosDisponiveis = new ArrayList<>();
         initGUI();
     }
 
@@ -45,6 +48,8 @@ public class ACMERobots {
         JButton cadastrarLocacao = new JButton("Cadastrar Locação");
         JButton processarLoc = new JButton("Processar Locação");
         JButton mostrarRelatorioGeral = new JButton("Relatório Geral");
+        JButton consultarLocacoes = new JButton("Consultar Locações");
+        JButton alterarStatus = new JButton("Alterar status da Locação");
 
         panelMenu.add(new JLabel("Bem vindo à ACMERobots"), BorderLayout.NORTH);
         JPanel buttonsPanel = new JPanel(new GridLayout(3, 1));
@@ -53,6 +58,8 @@ public class ACMERobots {
         buttonsPanel.add(cadastrarLocacao);
         buttonsPanel.add(processarLoc);
         buttonsPanel.add(mostrarRelatorioGeral);
+        buttonsPanel.add(consultarLocacoes);
+        buttonsPanel.add(alterarStatus);
         panelMenu.add(buttonsPanel, BorderLayout.CENTER);
 
         cadastrarRobo.addActionListener(new ActionListener() {
@@ -91,12 +98,30 @@ public class ACMERobots {
             }
         });
 
+        consultarLocacoes.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cards, "consultarLocacoes");
+                consultarTodasLocacoes();
+            }
+        });
+
+        alterarStatus.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cards, "alterarStatus");
+            }
+        });
+
         cards.add(panelMenu, "menu");
         cards.add(createCadastrarRoboPanel(), "cadastrarRobo");
         cards.add(createCadastrarClientePanel(), "cadastrarCliente");
         cards.add(createCadastrarLocacaoPanel(), "cadastrarLocacao");
         cards.add(createProcessarLocacaoPanel(), "processarLocacao");
         cards.add(createRelatorioGeralPanel(), "relatorioGeral");
+        cards.add(createMostrarLocacoesPanel(), "consultarLocacoes");
+        cards.add(createAlterarLocacoesPanel(), "alterarStatus");
+
 
         frame.add(cards);
         frame.setVisible(true);
@@ -344,6 +369,7 @@ public class ACMERobots {
 
         JLabel labelRobo = new JLabel("Robô:");
         roboModel = new DefaultComboBoxModel<>();
+        updateRoboModel();
         JComboBox<Robo> comboRobo = new JComboBox<>(roboModel);
 
         JButton adicionarRoboButton = new JButton("Adicionar Robô");
@@ -369,8 +395,9 @@ public class ACMERobots {
             public void actionPerformed(ActionEvent e) {
                 Robo r = (Robo) comboRobo.getSelectedItem();
                 if (r != null) {
-                robosSelecionados.add(r);
-                roboModel.removeElement(r);
+                robosLocacao.add(r);
+                robosDisponiveis.remove(r);
+                updateRoboModel();
                 JOptionPane.showMessageDialog(frame, "Robô adicionado com sucesso.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
                 }
             }
@@ -388,11 +415,6 @@ public class ACMERobots {
                         return;
                     }
 
-                    if (robosSelecionados.isEmpty()) {
-                        JOptionPane.showMessageDialog(frame, "Adicione pelo menos um robô.", "Erro", JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
-
                     for (Locacao l : locacoes) {
                         if (l.getNumero() == numero) {
                             JOptionPane.showMessageDialog(frame, "Número de locação já cadastrado.", "Erro", JOptionPane.ERROR_MESSAGE);
@@ -400,13 +422,19 @@ public class ACMERobots {
                         }
                     }
 
-                    Locacao locacao = new Locacao(numero, Status.CADASTRADA, null, 0, cliente, robosLocacao);
+                    Date dataInicio = new Date();
+                    Calendar c = Calendar.getInstance();
+                    c.setTime(dataInicio);
+                    c.add(Calendar.DAY_OF_MONTH, 7);
+                    long millis = c.getTimeInMillis();
+                    int dataFim = (int) (millis / (1000 * 60 * 60 * 24));
+
+                    Locacao locacao = new Locacao(numero, Status.CADASTRADA, dataInicio, dataFim, cliente, robosLocacao);
                     locacoes.add(locacao);
                     updateLocacaoModel();
-                    robosSelecionados.clear();
+                    robosLocacao.clear();
                     JOptionPane.showMessageDialog(frame, "Locação cadastrada com sucesso.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
                     textNumero.setText("");
-                    robosLocacao.clear();
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(frame, "Entrada inválida.", "Erro", JOptionPane.ERROR_MESSAGE);
                 }
@@ -465,7 +493,6 @@ public class ACMERobots {
     private JPanel createRelatorioGeralPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(new JLabel("Relatório Geral"), BorderLayout.NORTH);
-
         relatorioText = new JTextArea();
         relatorioText.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(relatorioText);
@@ -485,9 +512,100 @@ public class ACMERobots {
         return panel;
     }
 
+    private JPanel createMostrarLocacoesPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(new JLabel("Consultar Locações"), BorderLayout.NORTH);
+        locacoesText = new JTextArea();
+        locacoesText.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(locacoesText);
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        JButton voltarButton = new JButton("Voltar");
+        voltarButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cards, "menu");
+            }
+        });
+        panel.add(voltarButton, BorderLayout.SOUTH);
+
+        return panel;
+    }
+
+    private JPanel createAlterarLocacoesPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(new JLabel("Alterar status da locação"), BorderLayout.NORTH);
+
+        JPanel panelForm = new JPanel(new GridLayout(3, 2, 5, 5));
+        JLabel labelNumero = new JLabel("Número da Locação: ");
+        JTextField textNumero = new JTextField(10);
+
+        JLabel labelNovaSituacao = new JLabel("Nova Situação: ");
+        JComboBox<String> comboSituacao = new JComboBox<>(new String[]{"CADASTRADA", "EXECUTANDO", "FINALIZADA", "CANCELADA"});
+
+        JButton alterarButton = new JButton("Alterar");
+        JButton voltarButton = new JButton("Voltar");
+
+        panelForm.add(labelNumero);
+        panelForm.add(textNumero);
+        panelForm.add(labelNovaSituacao);
+        panelForm.add(comboSituacao);
+        panelForm.add(alterarButton);
+        panelForm.add(voltarButton);
+
+        panel.add(panelForm, BorderLayout.CENTER);
+
+        alterarButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    int numeroLoc = Integer.parseInt(textNumero.getText().trim());
+                    String novaSituacaoStr = (String) comboSituacao.getSelectedItem();
+                    if (novaSituacaoStr == null) {
+                        JOptionPane.showMessageDialog(frame, "Selecione uma nova situação.", "Erro", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    Status novaSituacao = Status.valueOf(novaSituacaoStr);
+
+                    Locacao loc = null;
+                    for (Locacao l : locacoes) {
+                        if (l.getNumero() == numeroLoc) {
+                            loc = l;
+                            break;
+                        }
+                    }
+
+                    if (loc == null) {
+                        JOptionPane.showMessageDialog(frame, "Locação não encontrada.", "Erro", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
+                    if (loc.getStatus() == Status.FINALIZADA || loc.getStatus() == Status.CANCELADA) {
+                        JOptionPane.showMessageDialog(frame, "Não é possível alterar a situação de uma locação finalizada ou cancelada.", "Erro", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
+                    loc.setStatus(novaSituacao);
+                    JOptionPane.showMessageDialog(frame, "Situação da locação alterada com sucesso.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                    consultarTodasLocacoes();
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(frame, "Entrada inválida.", "Erro", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        voltarButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cards, "menu");
+            }
+        });
+        return panel;
+    }
+
     private void updateRoboModel() {
         roboModel.removeAllElements();
-        for (Robo r : robos) {
+        for (Robo r : robosDisponiveis) {
             roboModel.addElement(r);
         }
     }
@@ -532,9 +650,9 @@ public class ACMERobots {
         }
 
         robos.add(novoRobo);
+        robosDisponiveis.add(novoRobo);
         updateRoboModel();
-        double valorFinal = novoRobo.calculaLocacao(dias);
-        JOptionPane.showMessageDialog(frame, "Robo cadastrado com sucesso. " +valorFinal);
+        JOptionPane.showMessageDialog(frame, "Robo cadastrado com sucesso. " ,"Sucesso", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void cadastrarCliente(int codigo, String nome, String tipo, String cpf, int ano) {
@@ -638,6 +756,32 @@ public class ACMERobots {
             }
         }
         relatorioText.setText(relatorio.toString());
+    }
+
+    private void consultarTodasLocacoes() {
+        StringBuilder relatorio = new StringBuilder();
+        if (locacoes.isEmpty()) {
+            JOptionPane.showMessageDialog(frame, "Nenhuma locação cadastrada.", "Erro", JOptionPane.ERROR_MESSAGE);
+            cardLayout.show(cards, "menu");
+            return;
+        }
+        for (Locacao l : locacoes) {
+            relatorio.append("Número da locação: ").append(l.getNumero()).append("\n");
+            relatorio.append("Cliente: ").append(l.getCliente().getNome()).append("\n");
+            relatorio.append("Status: ").append(l.getStatus()).append("\n");
+
+            List<Robo> robosLocados = l.getRobos();
+            if (robosLocados == null || robosLocados.isEmpty()) {
+                relatorio.append("Nenhum robô alocado.\n");
+            } else {
+                relatorio.append("Robôs alocados:\n");
+                for (Robo r : robosLocados) {
+                    relatorio.append(r.toString()).append("\n");
+                }
+            }
+            relatorio.append("Valor final: ").append(l.calculaValorFinal()).append("\n\n");
+        }
+        locacoesText.setText(relatorio.toString());
     }
 
 

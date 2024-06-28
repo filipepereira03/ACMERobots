@@ -11,8 +11,10 @@ public class Industrial extends Robo {
 
 	@Override
 	public double calculaLocacao(int dias) {
+
 		return getValorDiario() * dias;
 	}
+
 
 	public String toString() {
 		return super.toString() + " - Industrial - Setor: " + setor;
