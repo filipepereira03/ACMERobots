@@ -255,6 +255,7 @@ public class ACMERobots {
 
         nivelField.setEnabled(true);
         areaField.setEnabled(false);
+        setorField.setEnabled(false);
 
         return panel;
     }
