@@ -20,17 +20,24 @@ public class Locacao {
 
 	private ArrayList<Robo> roboLista;
 
-	private int dias;
 
-	public Locacao(int numero, Status situacao, Date dataInicio, int dataFim, Cliente cliente, ArrayList<Robo> roboLista, int dias) {
+
+	public Locacao(int numero, Status situacao, Date dataInicio, int dataFim, Cliente cliente, ArrayList<Robo> roboLista) {
 		this.numero = numero;
 		this.situacao = Status.CADASTRADA;
 		this.dataInicio = new Date();
 		this.dataFim = dataFim;
 		this.cliente = cliente;
-		this.dias = dias;
 		this.roboLista = new ArrayList<>(roboLista);
     }
+	public Locacao(int numero,  Date dataInicio, int dataFim, Cliente cliente, ArrayList<Robo> roboLista) {
+		this.numero = numero;
+		this.situacao = Status.CADASTRADA;
+		this.dataInicio = new Date();
+		this.dataFim = dataFim;
+		this.cliente = cliente;
+		this.roboLista = new ArrayList<>(roboLista);
+	}
 
 	public double calculaValorFinal() {
 		double valorLocacao = 0;

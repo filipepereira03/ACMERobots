@@ -6,6 +6,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 
@@ -50,6 +52,7 @@ public class ACMERobots {
         JButton mostrarRelatorioGeral = new JButton("Relatório Geral");
         JButton consultarLocacoes = new JButton("Consultar Locações");
         JButton alterarStatus = new JButton("Alterar status da Locação");
+        JButton carregarDadosIniciais = new JButton("Carregar dados iniciais:");
 
         panelMenu.add(new JLabel("Bem vindo à ACMERobots"), BorderLayout.NORTH);
         JPanel buttonsPanel = new JPanel(new GridLayout(3, 1));
@@ -60,6 +63,7 @@ public class ACMERobots {
         buttonsPanel.add(mostrarRelatorioGeral);
         buttonsPanel.add(consultarLocacoes);
         buttonsPanel.add(alterarStatus);
+        buttonsPanel.add(carregarDadosIniciais);
         panelMenu.add(buttonsPanel, BorderLayout.CENTER);
 
         cadastrarRobo.addActionListener(new ActionListener() {
@@ -113,6 +117,13 @@ public class ACMERobots {
             }
         });
 
+        carregarDadosIniciais.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cards, "carregarDadosIniciais");
+            }
+        });
+
         cards.add(panelMenu, "menu");
         cards.add(createCadastrarRoboPanel(), "cadastrarRobo");
         cards.add(createCadastrarClientePanel(), "cadastrarCliente");
@@ -121,6 +132,7 @@ public class ACMERobots {
         cards.add(createRelatorioGeralPanel(), "relatorioGeral");
         cards.add(createMostrarLocacoesPanel(), "consultarLocacoes");
         cards.add(createAlterarLocacoesPanel(), "alterarStatus");
+        cards.add(createCarregarDadosIniciaisPanel(), "carregarDadosIniciais");
 
 
         frame.add(cards);
@@ -322,7 +334,7 @@ public class ACMERobots {
                     String cpf = "";
                     if (textCPF.isEnabled()) {
                         cpf = textCPF.getText().trim();
-                        if (cpf.length() == 11 && cpf.matches("[0-9]+")) {
+                        if (cpf.matches("[0-9]+")) {
                         cpf = cpf.substring(0, 3) + "." + cpf.substring(3, 6) + "." + cpf.substring(6, 9) + "-" + cpf.substring(9);
                     } else {
                         JOptionPane.showMessageDialog(frame, "CPF inválido.", "Erro", JOptionPane.ERROR_MESSAGE);
@@ -370,8 +382,10 @@ public class ACMERobots {
         JPanel panelForm = new JPanel(new GridLayout(7, 2, 5, 5));
         JLabel labelNumero = new JLabel("Número:");
         JTextField textNumero = new JTextField(10);
-        JLabel labelDias = new JLabel("Dias de locação:");
-        JTextField texDias = new JTextField(10);
+        JLabel labelDataInicio = new JLabel("Data inicio:");
+        JTextField textDataInicio = new JTextField(10);
+        JLabel labelDataFim = new JLabel("Data fim:");
+        JTextField textDataFim = new JTextField(10);
         JLabel labelCliente = new JLabel("Cliente:");
         clienteModel = new DefaultComboBoxModel<>();
         for (Cliente c : clientes) {
@@ -390,8 +404,10 @@ public class ACMERobots {
 
         panelForm.add(labelNumero);
         panelForm.add(textNumero);
-        panelForm.add(labelDias);
-        panelForm.add(texDias);
+        panelForm.add(labelDataInicio);
+        panelForm.add(textDataInicio);
+        panelForm.add(labelDataFim);
+        panelForm.add(textDataFim);
         panelForm.add(labelCliente);
         panelForm.add(comboCliente);
         panelForm.add(labelRobo);
@@ -420,10 +436,15 @@ public class ACMERobots {
         cadastrarButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int dias = -1;
                 try {
                     int numero = Integer.parseInt(textNumero.getText().trim());
-                    dias = Integer.parseInt(texDias.getText().trim());
+                    Date dataInicio = new Date();
+                    Calendar c = Calendar.getInstance();
+                    c.setTime(dataInicio);
+                    c.add(Calendar.DAY_OF_MONTH, 7);
+                    long millis = c.getTimeInMillis();
+                    int dataFim = (int) (millis / (1000 * 60 * 60 * 24));
+
                     Cliente cliente = (Cliente) comboCliente.getSelectedItem();
 
                     if (clientes.isEmpty()) {
@@ -438,14 +459,7 @@ public class ACMERobots {
                         }
                     }
 
-                    Date dataInicio = new Date();
-                    Calendar c = Calendar.getInstance();
-                    c.setTime(dataInicio);
-                    c.add(Calendar.DAY_OF_MONTH, 7);
-                    long millis = c.getTimeInMillis();
-                    int dataFim = (int) (millis / (1000 * 60 * 60 * 24));
-
-                    Locacao locacao = new Locacao(numero, Status.CADASTRADA, dataInicio, dataFim, cliente, robosLocacao, dias);
+                    Locacao locacao = new Locacao(numero, Status.CADASTRADA, dataInicio, dataFim, cliente, robosLocacao);
                     locacoes.add(locacao);
                     updateLocacaoModel();
                     robosLocacao.clear();
@@ -616,6 +630,135 @@ public class ACMERobots {
                 cardLayout.show(cards, "menu");
             }
         });
+        return panel;
+    }
+
+    private JPanel createCarregarDadosIniciaisPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(new JLabel("Carregar dados iniciais"), BorderLayout.NORTH);
+        JPanel panelForm = new JPanel(new GridLayout(3, 2, 5, 5));
+        JButton carregarButtonRobo = new JButton("Carregar Robos");
+        JButton carregarButtonCliente = new JButton("Carregar Clientes");
+        JButton carregarButtonLocacao = new JButton("Carregar Locações");
+        JButton voltarButton = new JButton("Voltar");
+        panelForm.add(carregarButtonRobo);
+        panelForm.add(carregarButtonCliente);
+        panelForm.add(carregarButtonLocacao);
+        panelForm.add(voltarButton);
+        panel.add(panelForm, BorderLayout.CENTER);
+
+        carregarButtonRobo.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                CSVReader csv = new CSVReader();
+                String input = JOptionPane.showInputDialog(frame, "Digite o nome do arquivo:");
+                String arq = input + ".CSV";
+                List<String[]> dados = csv.fileReader(arq);
+                for (String[] dado : dados) {
+                    System.out.println(Arrays.toString(dado));
+                    int id = Integer.parseInt(dado[0]);
+                    String modelo = dado[1];
+                    int tipo = Integer.parseInt(dado[2]);
+                    switch (tipo) {
+                        case 1:
+                            String tipoStr = "Doméstico";
+                            int nivel = Integer.parseInt(dado[3]);
+                            cadastrarRobo(id, modelo, tipoStr, "", nivel, 0);
+                            break;
+                        case 2:
+                            String tipoStr2 = "Agrícola";
+                            double area = Double.parseDouble(dado[3]);
+                            cadastrarRobo(id, modelo, tipoStr2, "", 0, area);
+                            break;
+                        case 3:
+                            String tipoStr3 = "Industrial";
+                            String setor = dado[3];
+                            cadastrarRobo(id, modelo, tipoStr3, setor, 0, 0);
+                            break;
+                    }
+
+                }
+                updateRoboModel();
+            }
+        });
+
+
+        carregarButtonCliente.addActionListener(new ActionListener() {
+            @Override
+                    public void actionPerformed(ActionEvent e) {
+                        CSVReader csv = new CSVReader();
+                        String input = JOptionPane.showInputDialog(frame, "Digite o nome do arquivo:");
+                        String arq = input + ".CSV";
+                        List<String[]> dados = csv.fileReader(arq);
+                        for (String[] dado : dados) {
+                            System.out.println(Arrays.toString(dado));
+                            int codigo = Integer.parseInt(dado[0]);
+                            String nome = dado[1];
+                            int tipo = Integer.parseInt(dado[2]);
+                            switch(tipo) {
+                                case 1:
+                                    String tipoStr = "Individual";
+                                    String cpf = dado[3];
+                                    cadastrarCliente(codigo, nome, tipoStr, cpf, 0);
+                                    break;
+                                case 2:
+                                    String tipoStr2 = "Empresarial";
+                                    int ano = Integer.parseInt(dado[3]);
+                                    cadastrarCliente(codigo, nome, tipoStr2, "", ano);
+                                    break;
+                            }
+                        }
+                        updateClienteModel();
+                    }
+                });
+
+        carregarButtonLocacao.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                CSVReader csv = new CSVReader();
+                String input = JOptionPane.showInputDialog(frame, "Digite o nome do arquivo:");
+                String arq = input + ".CSV";
+                List<String[]> dados = csv.fileReader(arq);
+                for (String[] dado : dados) {
+                    System.out.println(Arrays.toString(dado));
+                    int numero = Integer.parseInt(dado[0]);
+                    Date dataInicio = new Date();
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                    dataInicio.setTime(Long.parseLong(dado[1]));
+                    Calendar c = Calendar.getInstance();
+                    c.setTime(dataInicio);
+                    c.add(Calendar.DAY_OF_MONTH, 7);
+                    long millis = c.getTimeInMillis();
+                    int dataFim = (int) (millis / (1000 * 60 * 60 * 24));
+                    dataFim = Integer.parseInt(dado[2]);
+                    int codigo = Integer.parseInt(dado[3]);
+                    Cliente cliente = null;
+                    for (Cliente c1 : clientes) {
+                        if (c1.getCodigo() == codigo) {
+                            cliente = c1;
+                            break;
+                        }
+                    }
+                    if (cliente == null) {
+                        JOptionPane.showMessageDialog(frame, "Cliente não encontrado.", "Erro", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    Locacao locacao = new Locacao(numero, dataInicio, dataFim, cliente, new ArrayList<>());
+                    locacoes.add(locacao);
+                }
+                updateLocacaoModel();
+            }
+        });
+
+
+
+        voltarButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cards, "menu");
+            }
+        });
+
         return panel;
     }
 
@@ -799,8 +942,6 @@ public class ACMERobots {
         }
         locacoesText.setText(relatorio.toString());
     }
-
-
 }
 
 
