@@ -142,8 +142,8 @@ public class ACMERobots {
         JTextField nivelField = new JTextField(10);
         JLabel areaLabel = new JLabel("Área (Agrícola):");
         JTextField areaField = new JTextField(10);
-        JLabel diasLabel = new JLabel("Dias de locação:");
-        JTextField diasField = new JTextField(10);
+        JLabel setorLabel = new JLabel("Setor (Industrial):");
+        JTextField setorField = new JTextField(10);
         JButton cadastrarButton = new JButton("Cadastrar");
         JButton voltarButton = new JButton("Voltar");
 
@@ -157,8 +157,8 @@ public class ACMERobots {
         panelForm.add(nivelField);
         panelForm.add(areaLabel);
         panelForm.add(areaField);
-        panelForm.add(diasLabel);
-        panelForm.add(diasField);
+        panelForm.add(setorLabel);
+        panelForm.add(setorField);
         panelForm.add(cadastrarButton);
         panelForm.add(voltarButton);
 
@@ -170,16 +170,19 @@ public class ACMERobots {
                 String tipo = (String) comboTipo.getSelectedItem();
                 switch (tipo) {
                     case "Doméstico":
-                        nivelField.setEnabled(true);
                         areaField.setEnabled(false);
+                        setorField.setEnabled(false);
+                        nivelField.setEnabled(true);
                         break;
                     case "Agrícola":
                         nivelField.setEnabled(false);
                         areaField.setEnabled(true);
+                        setorField.setEnabled(false);
                         break;
                     case "Industrial":
                         nivelField.setEnabled(false);
                         areaField.setEnabled(false);
+                        setorField.setEnabled(true);
                         break;
                 }
             }
@@ -217,20 +220,27 @@ public class ACMERobots {
                             return;
                         }
                     }
-                    int dias = Integer.parseInt(diasField.getText().trim());
+                    String setor = "";
+                    if (setorField.isEnabled()) {
+                        setor = setorField.getText();
+                        if (setor.isEmpty()) {
+                        JOptionPane.showMessageDialog(frame, "Campo setor é obrigatório", "Erro", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
 
-                    cadastrarRobo(id, modelo, tipo, dias, nivel, area);
+
+                    cadastrarRobo(id, modelo, tipo, setor, nivel, area);
 
                     idField.setText("");
                     modeloField.setText("");
-                    diasField.setText("");
+                    setorField.setText("");
                     nivelField.setText("");
                     areaField.setText("");
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(frame, "Por favor, insira valores válidos.", "Erro", JOptionPane.ERROR_MESSAGE);
                     idField.setText("");
                     modeloField.setText("");
-                    diasField.setText("");
+                    setorField.setText("");
                     nivelField.setText("");
                     areaField.setText("");
                 }
@@ -359,8 +369,9 @@ public class ACMERobots {
         JPanel panelForm = new JPanel(new GridLayout(7, 2, 5, 5));
         JLabel labelNumero = new JLabel("Número:");
         JTextField textNumero = new JTextField(10);
+        JLabel labelDias = new JLabel("Dias de locação:");
+        JTextField texDias = new JTextField(10);
         JLabel labelCliente = new JLabel("Cliente:");
-
         clienteModel = new DefaultComboBoxModel<>();
         for (Cliente c : clientes) {
             clienteModel.addElement(c);
@@ -378,6 +389,8 @@ public class ACMERobots {
 
         panelForm.add(labelNumero);
         panelForm.add(textNumero);
+        panelForm.add(labelDias);
+        panelForm.add(texDias);
         panelForm.add(labelCliente);
         panelForm.add(comboCliente);
         panelForm.add(labelRobo);
@@ -406,8 +419,10 @@ public class ACMERobots {
         cadastrarButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                int dias = -1;
                 try {
                     int numero = Integer.parseInt(textNumero.getText().trim());
+                    dias = Integer.parseInt(texDias.getText().trim());
                     Cliente cliente = (Cliente) comboCliente.getSelectedItem();
 
                     if (clientes.isEmpty()) {
@@ -429,7 +444,7 @@ public class ACMERobots {
                     long millis = c.getTimeInMillis();
                     int dataFim = (int) (millis / (1000 * 60 * 60 * 24));
 
-                    Locacao locacao = new Locacao(numero, Status.CADASTRADA, dataInicio, dataFim, cliente, robosLocacao);
+                    Locacao locacao = new Locacao(numero, Status.CADASTRADA, dataInicio, dataFim, cliente, robosLocacao, dias);
                     locacoes.add(locacao);
                     updateLocacaoModel();
                     robosLocacao.clear();
@@ -624,7 +639,7 @@ public class ACMERobots {
         }
     }
 
-    private void cadastrarRobo(int id, String modelo, String tipo,  int dias, int nivel, double area) {
+    private void cadastrarRobo(int id, String modelo, String tipo,  String setor, int nivel, double area) {
 
         for (Robo r : robos) {
             if (r.getId() == id) {
@@ -642,7 +657,7 @@ public class ACMERobots {
                 novoRobo = new Agricola(id, modelo, area);
                 break;
             case "Industrial":
-                novoRobo = new Industrial(id, modelo, "Setor");
+                novoRobo = new Industrial(id, modelo, setor);
                 break;
             default:
                 JOptionPane.showMessageDialog(frame, "Tipo de robô inválido.", "Erro", JOptionPane.ERROR_MESSAGE);

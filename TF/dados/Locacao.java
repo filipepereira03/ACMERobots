@@ -20,12 +20,15 @@ public class Locacao {
 
 	private ArrayList<Robo> roboLista;
 
-	public Locacao(int numero, Status situacao, Date dataInicio, int dataFim, Cliente cliente, ArrayList<Robo> roboLista) {
+	private int dias;
+
+	public Locacao(int numero, Status situacao, Date dataInicio, int dataFim, Cliente cliente, ArrayList<Robo> roboLista, int dias) {
 		this.numero = numero;
 		this.situacao = Status.CADASTRADA;
 		this.dataInicio = new Date();
 		this.dataFim = dataFim;
 		this.cliente = cliente;
+		this.dias = dias;
 		this.roboLista = new ArrayList<>(roboLista);
     }
 
@@ -43,7 +46,6 @@ public class Locacao {
 	public int calcularDias() {
 		long diff = dataFim - (dataInicio.getTime() / (1000 * 60 * 60 * 24));
 		int dias = (int) diff;
-		System.out.println("Dias: " + dias);
 		return dias;
 	}
 
