@@ -43,6 +43,7 @@ public class Locacao implements Serializable {
         for (Robo r : roboLista) {
             double valorRobo = r.calculaLocacao(calcularDias());
             valorLocacao += valorRobo;
+
         }
         double desconto = cliente.calculaDesconto(roboLista.size());
         double valorFinal = valorLocacao - (valorLocacao * desconto);
@@ -50,9 +51,10 @@ public class Locacao implements Serializable {
     }
 
     public int calcularDias() {
-        long diff = dataFim - (dataInicio.getTime() / (1000 * 60 * 60 * 24));
-        int dias = (int) diff;
-        return dias;
+        long millisDataInicio = dataInicio.getTime();
+        long millisDataFim = (long) dataFim * 24 * 60 * 60 * 1000L;
+        long diferencaMillis = millisDataFim - millisDataInicio;
+        return (int) (diferencaMillis / (1000 * 60 * 60 * 24));
     }
 
 

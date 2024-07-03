@@ -7,6 +7,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
@@ -59,6 +61,7 @@ public class ACMERobots implements Serializable {
         JButton salvarDados = new JButton("Salvar dados");
         JButton carregarDados = new JButton("Carregar dados");
         JButton finalizarSistema = new JButton("Finalizar Sistema");
+        JButton descubra = new JButton("Descubra");
 
         panelMenu.add(new JLabel("Bem vindo à ACMERobots"), BorderLayout.NORTH);
         JPanel buttonsPanel = new JPanel(new GridLayout(3, 1));
@@ -73,8 +76,25 @@ public class ACMERobots implements Serializable {
         buttonsPanel.add(salvarDados);
         buttonsPanel.add(carregarDados);
         buttonsPanel.add(finalizarSistema);
+        buttonsPanel.add(descubra);
         panelMenu.add(buttonsPanel, BorderLayout.CENTER);
 
+
+        descubra.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+                if (Desktop.isDesktopSupported()) {
+                    try {
+                        Desktop.getDesktop().browse(new URI(url));
+                    } catch (IOException | URISyntaxException ex) {
+                        JOptionPane.showMessageDialog(frame, "Erro ao abrir o link.", "Erro", JOptionPane.ERROR_MESSAGE);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Erro ao abrir o link.", "Erro", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
         finalizarSistema.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
