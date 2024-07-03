@@ -3,6 +3,7 @@ package dados;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+
 public class CSVReader {
     public List<String[]> fileReader(String nomeArquivoIn) {
         List<String[]> dadosLidos = new ArrayList<>();
@@ -14,7 +15,8 @@ public class CSVReader {
                 dadosLidos.add(values);
             }
         } catch (FileNotFoundException e) {
-            System.out.println("Arquivo não Encontrado");;
+            System.out.println("Arquivo não Encontrado");
+            ;
         } catch (IOException e) {
             System.out.println("Erro ao ler o arquivo:" + e.getMessage());
         }

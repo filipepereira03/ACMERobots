@@ -2,16 +2,16 @@ package aplicacao;
 
 import dados.*;
 
+import java.io.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 
-public class ACMERobots {
+public class ACMERobots implements Serializable {
     private JFrame frame;
     private JPanel cards;
     private CardLayout cardLayout;
@@ -20,9 +20,11 @@ public class ACMERobots {
     private ArrayList<Robo> robos;
     private ArrayList<Cliente> clientes;
     private ArrayList<Locacao> locacoes;
+    private Queue<Locacao> locacoesPendentes;
     private DefaultComboBoxModel<Robo> roboModel;
     private DefaultComboBoxModel<Cliente> clienteModel;
     private DefaultComboBoxModel<Locacao> locacaoModel;
+    private DefaultComboBoxModel<Locacao> locacaoModelPendente;
     private ArrayList<Robo> robosSelecionados;
     private ArrayList<Robo> robosDisponiveis;
 
@@ -33,6 +35,7 @@ public class ACMERobots {
         locacoes = new ArrayList<>();
         robosSelecionados = new ArrayList<>();
         robosDisponiveis = new ArrayList<>();
+        locacoesPendentes = new LinkedList<>();
         initGUI();
     }
 
@@ -53,6 +56,9 @@ public class ACMERobots {
         JButton consultarLocacoes = new JButton("Consultar Locações");
         JButton alterarStatus = new JButton("Alterar status da Locação");
         JButton carregarDadosIniciais = new JButton("Carregar dados iniciais:");
+        JButton salvarDados = new JButton("Salvar dados");
+        JButton carregarDados = new JButton("Carregar dados");
+        JButton finalizarSistema = new JButton("Finalizar Sistema");
 
         panelMenu.add(new JLabel("Bem vindo à ACMERobots"), BorderLayout.NORTH);
         JPanel buttonsPanel = new JPanel(new GridLayout(3, 1));
@@ -64,8 +70,56 @@ public class ACMERobots {
         buttonsPanel.add(consultarLocacoes);
         buttonsPanel.add(alterarStatus);
         buttonsPanel.add(carregarDadosIniciais);
+        buttonsPanel.add(salvarDados);
+        buttonsPanel.add(carregarDados);
+        buttonsPanel.add(finalizarSistema);
         panelMenu.add(buttonsPanel, BorderLayout.CENTER);
 
+        finalizarSistema.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
+        });
+        carregarDados.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    FileInputStream fileIn = new FileInputStream("dados.ser");
+                    ObjectInputStream in = new ObjectInputStream(fileIn);
+                    robos = (ArrayList<Robo>) in.readObject();
+                    clientes = (ArrayList<Cliente>) in.readObject();
+                    locacoes = (ArrayList<Locacao>) in.readObject();
+                    updateRoboModel();
+                    updateLocacaoModel();
+                    updateClienteModel();
+                    in.close();
+                    fileIn.close();
+
+                    JOptionPane.showMessageDialog(frame, "Dados carregados com sucesso.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                } catch (IOException | ClassNotFoundException ex) {
+                    JOptionPane.showMessageDialog(frame, "Erro ao carregar os dados.", "Erro", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+        salvarDados.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    FileOutputStream fileOut = new FileOutputStream("dados.ser");
+                    ObjectOutputStream out = new ObjectOutputStream(fileOut);
+                    out.writeObject(robos);
+                    out.writeObject(clientes);
+                    out.writeObject(locacoes);
+                    out.close();
+                    fileOut.close();
+                    JOptionPane.showMessageDialog(frame, "Dados salvos com sucesso.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(frame, "Erro ao salvar os dados.", "Erro", JOptionPane.ERROR_MESSAGE);
+                }
+
+            }
+        });
         cadastrarRobo.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -97,8 +151,8 @@ public class ACMERobots {
         mostrarRelatorioGeral.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                 cardLayout.show(cards, "relatorioGeral");
-                 mostrarRelatorioGeral();
+                cardLayout.show(cards, "relatorioGeral");
+                mostrarRelatorioGeral();
             }
         });
 
@@ -143,7 +197,7 @@ public class ACMERobots {
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(new JLabel("Tela de cadastro de robôs", JLabel.CENTER), BorderLayout.NORTH);
 
-        JPanel panelForm = new JPanel(new GridLayout(7, 2, 5, 5));
+        JPanel panelForm = new JPanel(new GridLayout(8, 2, 5, 5));
         JLabel idLabel = new JLabel("ID:");
         JTextField idField = new JTextField(10);
         JLabel modeloLabel = new JLabel("Modelo:");
@@ -154,6 +208,8 @@ public class ACMERobots {
         JTextField nivelField = new JTextField(10);
         JLabel areaLabel = new JLabel("Área (Agrícola):");
         JTextField areaField = new JTextField(10);
+        JLabel usoLabel = new JLabel("Uso (Agrícola):");
+        JTextField usoField = new JTextField(10);
         JLabel setorLabel = new JLabel("Setor (Industrial):");
         JTextField setorField = new JTextField(10);
         JButton cadastrarButton = new JButton("Cadastrar");
@@ -169,6 +225,8 @@ public class ACMERobots {
         panelForm.add(nivelField);
         panelForm.add(areaLabel);
         panelForm.add(areaField);
+        panelForm.add(usoLabel);
+        panelForm.add(usoField);
         panelForm.add(setorLabel);
         panelForm.add(setorField);
         panelForm.add(cadastrarButton);
@@ -185,16 +243,19 @@ public class ACMERobots {
                         areaField.setEnabled(false);
                         setorField.setEnabled(false);
                         nivelField.setEnabled(true);
+                        usoField.setEnabled(false);
                         break;
                     case "Agrícola":
                         nivelField.setEnabled(false);
                         areaField.setEnabled(true);
                         setorField.setEnabled(false);
+                        usoField.setEnabled(true);
                         break;
                     case "Industrial":
                         nivelField.setEnabled(false);
                         areaField.setEnabled(false);
                         setorField.setEnabled(true);
+                        usoField.setEnabled(false);
                         break;
                 }
             }
@@ -236,18 +297,26 @@ public class ACMERobots {
                     if (setorField.isEnabled()) {
                         setor = setorField.getText();
                         if (setor.isEmpty()) {
-                        JOptionPane.showMessageDialog(frame, "Campo setor é obrigatório", "Erro", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(frame, "Campo setor é obrigatório", "Erro", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                    String uso = "";
+                    if (usoField.isEnabled()) {
+                        uso = usoField.getText();
+                        if (uso.isEmpty()) {
+                            JOptionPane.showMessageDialog(frame, "Campo uso é obrigatório", "Erro", JOptionPane.ERROR_MESSAGE);
                         }
                     }
 
 
-                    cadastrarRobo(id, modelo, tipo, setor, nivel, area);
+                    cadastrarRobo(id, modelo, tipo, setor, nivel, area, uso);
 
                     idField.setText("");
                     modeloField.setText("");
                     setorField.setText("");
                     nivelField.setText("");
                     areaField.setText("");
+                    usoField.setText("");
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(frame, "Por favor, insira valores válidos.", "Erro", JOptionPane.ERROR_MESSAGE);
                     idField.setText("");
@@ -255,6 +324,7 @@ public class ACMERobots {
                     setorField.setText("");
                     nivelField.setText("");
                     areaField.setText("");
+                    usoField.setText("");
                 }
             }
         });
@@ -268,6 +338,7 @@ public class ACMERobots {
         nivelField.setEnabled(true);
         areaField.setEnabled(false);
         setorField.setEnabled(false);
+        usoField.setEnabled(false);
 
         return panel;
     }
@@ -275,7 +346,7 @@ public class ACMERobots {
     private JPanel createCadastrarClientePanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(new JLabel("Tela de cadastro de clientes", JLabel.CENTER), BorderLayout.NORTH);
-        JPanel panelForm = new JPanel(new GridLayout(7, 2,5,5));
+        JPanel panelForm = new JPanel(new GridLayout(7, 2, 5, 5));
         JLabel labelCodigo = new JLabel("Código:");
         JTextField textCodigo = new JTextField(10);
         JLabel labelNome = new JLabel("Nome:");
@@ -335,11 +406,11 @@ public class ACMERobots {
                     if (textCPF.isEnabled()) {
                         cpf = textCPF.getText().trim();
                         if (cpf.matches("[0-9]+")) {
-                        cpf = cpf.substring(0, 3) + "." + cpf.substring(3, 6) + "." + cpf.substring(6, 9) + "-" + cpf.substring(9);
-                    } else {
-                        JOptionPane.showMessageDialog(frame, "CPF inválido.", "Erro", JOptionPane.ERROR_MESSAGE);
-                        textCPF.setText("");
-                        return;
+                            cpf = cpf.substring(0, 3) + "." + cpf.substring(3, 6) + "." + cpf.substring(6, 9) + "-" + cpf.substring(9);
+                        } else {
+                            JOptionPane.showMessageDialog(frame, "CPF inválido.", "Erro", JOptionPane.ERROR_MESSAGE);
+                            textCPF.setText("");
+                            return;
                         }
                     }
                     int ano = tipo.equals("Empresarial") ? Integer.parseInt(textAno.getText().trim()) : 0;
@@ -373,8 +444,6 @@ public class ACMERobots {
         return panel;
     }
 
-    // Arrumar o botão de adicionar robôs, que acho que não está fazendo nada
-    // Tentar fazer o JCombo limpar os robôs que foram adicionados já
     private JPanel createCadastrarLocacaoPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(new JLabel("Tela de cadastro de locações"), BorderLayout.NORTH);
@@ -425,10 +494,10 @@ public class ACMERobots {
             public void actionPerformed(ActionEvent e) {
                 Robo r = (Robo) comboRobo.getSelectedItem();
                 if (r != null) {
-                robosLocacao.add(r);
-                robosDisponiveis.remove(r);
-                updateRoboModel();
-                JOptionPane.showMessageDialog(frame, "Robô adicionado com sucesso.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                    robosLocacao.add(r);
+                    robosDisponiveis.remove(r);
+                    updateRoboModel();
+                    JOptionPane.showMessageDialog(frame, "Robô adicionado com sucesso.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
                 }
             }
         });
@@ -486,7 +555,7 @@ public class ACMERobots {
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(new JLabel("Tela de processamento de locações"), BorderLayout.NORTH);
 
-        JButton processarButton = new JButton("Processar locação");
+        JButton processarManualButton = new JButton("Processar locação");
         JButton voltarButton = new JButton("Voltar");
 
         locacaoModel = new DefaultComboBoxModel<>();
@@ -495,7 +564,8 @@ public class ACMERobots {
         }
         JComboBox<Locacao> comboLocacao = new JComboBox<>(locacaoModel);
 
-        processarButton.addActionListener(new ActionListener() {
+
+        processarManualButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 processarLocacoes();
@@ -509,9 +579,9 @@ public class ACMERobots {
             }
         });
 
-        JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 5, 5));
+        JPanel buttonPanel = new JPanel(new GridLayout(3, 1, 5, 5));
         buttonPanel.add(comboLocacao);
-        buttonPanel.add(processarButton);
+        buttonPanel.add(processarManualButton);
         buttonPanel.add(voltarButton);
 
         panel.add(buttonPanel, BorderLayout.CENTER);
@@ -536,7 +606,6 @@ public class ACMERobots {
             }
         });
         panel.add(voltarButton, BorderLayout.SOUTH);
-
 
 
         return panel;
@@ -663,17 +732,17 @@ public class ACMERobots {
                         case 1:
                             String tipoStr = "Doméstico";
                             int nivel = Integer.parseInt(dado[3]);
-                            cadastrarRobo(id, modelo, tipoStr, "", nivel, 0);
+                            cadastrarRobo(id, modelo, tipoStr, "", nivel, 0, "");
                             break;
                         case 2:
                             String tipoStr2 = "Agrícola";
                             double area = Double.parseDouble(dado[3]);
-                            cadastrarRobo(id, modelo, tipoStr2, "", 0, area);
+                            cadastrarRobo(id, modelo, tipoStr2, "", 0, area, "");
                             break;
                         case 3:
                             String tipoStr3 = "Industrial";
                             String setor = dado[3];
-                            cadastrarRobo(id, modelo, tipoStr3, setor, 0, 0);
+                            cadastrarRobo(id, modelo, tipoStr3, setor, 0, 0, "");
                             break;
                     }
 
@@ -685,32 +754,32 @@ public class ACMERobots {
 
         carregarButtonCliente.addActionListener(new ActionListener() {
             @Override
-                    public void actionPerformed(ActionEvent e) {
-                        CSVReader csv = new CSVReader();
-                        String input = JOptionPane.showInputDialog(frame, "Digite o nome do arquivo:");
-                        String arq = input + ".CSV";
-                        List<String[]> dados = csv.fileReader(arq);
-                        for (String[] dado : dados) {
-                            System.out.println(Arrays.toString(dado));
-                            int codigo = Integer.parseInt(dado[0]);
-                            String nome = dado[1];
-                            int tipo = Integer.parseInt(dado[2]);
-                            switch(tipo) {
-                                case 1:
-                                    String tipoStr = "Individual";
-                                    String cpf = dado[3];
-                                    cadastrarCliente(codigo, nome, tipoStr, cpf, 0);
-                                    break;
-                                case 2:
-                                    String tipoStr2 = "Empresarial";
-                                    int ano = Integer.parseInt(dado[3]);
-                                    cadastrarCliente(codigo, nome, tipoStr2, "", ano);
-                                    break;
-                            }
-                        }
-                        updateClienteModel();
+            public void actionPerformed(ActionEvent e) {
+                CSVReader csv = new CSVReader();
+                String input = JOptionPane.showInputDialog(frame, "Digite o nome do arquivo:");
+                String arq = input + ".CSV";
+                List<String[]> dados = csv.fileReader(arq);
+                for (String[] dado : dados) {
+                    System.out.println(Arrays.toString(dado));
+                    int codigo = Integer.parseInt(dado[0]);
+                    String nome = dado[1];
+                    int tipo = Integer.parseInt(dado[2]);
+                    switch (tipo) {
+                        case 1:
+                            String tipoStr = "Individual";
+                            String cpf = dado[3];
+                            cadastrarCliente(codigo, nome, tipoStr, cpf, 0);
+                            break;
+                        case 2:
+                            String tipoStr2 = "Empresarial";
+                            int ano = Integer.parseInt(dado[3]);
+                            cadastrarCliente(codigo, nome, tipoStr2, "", ano);
+                            break;
                     }
-                });
+                }
+                updateClienteModel();
+            }
+        });
 
         carregarButtonLocacao.addActionListener(new ActionListener() {
             @Override
@@ -722,34 +791,38 @@ public class ACMERobots {
                 for (String[] dado : dados) {
                     System.out.println(Arrays.toString(dado));
                     int numero = Integer.parseInt(dado[0]);
-                    Date dataInicio = new Date();
+                    String dataStringInicio = dado[1];
+                    String dataStringFim = dado[2];
                     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-                    dataInicio.setTime(Long.parseLong(dado[1]));
-                    Calendar c = Calendar.getInstance();
-                    c.setTime(dataInicio);
-                    c.add(Calendar.DAY_OF_MONTH, 7);
-                    long millis = c.getTimeInMillis();
-                    int dataFim = (int) (millis / (1000 * 60 * 60 * 24));
-                    dataFim = Integer.parseInt(dado[2]);
-                    int codigo = Integer.parseInt(dado[3]);
-                    Cliente cliente = null;
-                    for (Cliente c1 : clientes) {
-                        if (c1.getCodigo() == codigo) {
-                            cliente = c1;
-                            break;
+                    try {
+                        Date dataInicio = sdf.parse(dataStringInicio);
+                        Date dataFim = sdf.parse(dataStringFim);
+                        Calendar c = Calendar.getInstance();
+                        c.setTime(dataFim);
+                        c.add(Calendar.DAY_OF_MONTH, 7);
+                        long millis = c.getTimeInMillis();
+                        int dataFimInt = (int) (millis / (1000 * 60 * 60 * 24));
+                        int codigo = Integer.parseInt(dado[3]);
+                        Cliente cliente = null;
+                        for (Cliente c1 : clientes) {
+                            if (c1.getCodigo() == codigo) {
+                                cliente = c1;
+                                break;
+                            }
                         }
+                        if (cliente == null) {
+                            JOptionPane.showMessageDialog(frame, "Cliente não encontrado.", "Erro", JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+                        Locacao locacao = new Locacao(numero, dataInicio, dataFimInt, cliente, new ArrayList<>());
+                        locacoes.add(locacao);
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(frame, "Erro ao processar datas.", "Erro", JOptionPane.ERROR_MESSAGE);
                     }
-                    if (cliente == null) {
-                        JOptionPane.showMessageDialog(frame, "Cliente não encontrado.", "Erro", JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
-                    Locacao locacao = new Locacao(numero, dataInicio, dataFim, cliente, new ArrayList<>());
-                    locacoes.add(locacao);
                 }
                 updateLocacaoModel();
             }
         });
-
 
 
         voltarButton.addActionListener(new ActionListener() {
@@ -783,7 +856,14 @@ public class ACMERobots {
         }
     }
 
-    private void cadastrarRobo(int id, String modelo, String tipo,  String setor, int nivel, double area) {
+    private void updateLocacaoPendenteModel() {
+        locacaoModel.removeAllElements();
+        for (Locacao l : locacoesPendentes) {
+            locacaoModel.addElement(l);
+        }
+    }
+
+    private void cadastrarRobo(int id, String modelo, String tipo, String setor, int nivel, double area, String uso) {
 
         for (Robo r : robos) {
             if (r.getId() == id) {
@@ -798,7 +878,7 @@ public class ACMERobots {
                 novoRobo = new Domestico(id, modelo, nivel);
                 break;
             case "Agrícola":
-                novoRobo = new Agricola(id, modelo, area);
+                novoRobo = new Agricola(id, modelo, area, uso);
                 break;
             case "Industrial":
                 novoRobo = new Industrial(id, modelo, setor);
@@ -811,7 +891,7 @@ public class ACMERobots {
         robos.add(novoRobo);
         robosDisponiveis.add(novoRobo);
         updateRoboModel();
-        JOptionPane.showMessageDialog(frame, "Robo cadastrado com sucesso. " ,"Sucesso", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(frame, "Robo cadastrado com sucesso. ", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void cadastrarCliente(int codigo, String nome, String tipo, String cpf, int ano) {
@@ -831,7 +911,7 @@ public class ACMERobots {
 
         if (novoCliente != null) {
             clientes.add(novoCliente);
-        JOptionPane.showMessageDialog(frame, "Cliente cadastrado com sucesso.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(frame, "Cliente cadastrado com sucesso.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
         } else {
             JOptionPane.showMessageDialog(frame, "Erro ao cadastrar cliente.", "Erro", JOptionPane.ERROR_MESSAGE);
         }
@@ -941,6 +1021,39 @@ public class ACMERobots {
             relatorio.append("Valor final: ").append(l.calculaValorFinal()).append("\n\n");
         }
         locacoesText.setText(relatorio.toString());
+    }
+
+    private Queue<Locacao> getLocacoesPendentes() {
+        for (Locacao l : locacoes) {
+            if (l.getStatus() == Status.CADASTRADA) {
+                locacoesPendentes.add(l);
+            }
+        }
+        return locacoesPendentes;
+    }
+
+    private void processarLocacaoPendente() {
+        Queue<Locacao> locacoesPendentes = getLocacoesPendentes();
+        if (locacoesPendentes.isEmpty()) {
+            JOptionPane.showMessageDialog(frame, "Nenhuma locação pendente.", "Erro", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        Locacao loc = locacoesPendentes.poll();
+        List<Robo> robosSolicitados = loc.getRobos();
+        boolean todosDisponiveis = robosSolicitados.stream().allMatch(Robo::estaDisponivel);
+
+        if (todosDisponiveis) {
+            robosSolicitados.forEach(Robo::locar);
+            loc.setStatus(Status.EXECUTANDO);
+            JOptionPane.showMessageDialog(frame, "Locação processada com sucesso.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            robosSolicitados.stream().filter(Robo::estaLocado).forEach(Robo::liberar);
+            loc.setStatus(Status.CADASTRADA);
+            JOptionPane.showMessageDialog(frame, "Alguns robôs não estão disponíveis.", "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+
+        updateLocacaoModel();
     }
 }
 
