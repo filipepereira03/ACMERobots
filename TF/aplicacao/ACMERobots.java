@@ -61,7 +61,7 @@ public class ACMERobots implements Serializable {
         JButton salvarDados = new JButton("Salvar dados");
         JButton carregarDados = new JButton("Carregar dados");
         JButton finalizarSistema = new JButton("Finalizar Sistema");
-        JButton descubra = new JButton("Descubra");
+        JButton linkRelatorio = new JButton("Link Relatório");
 
         panelMenu.add(new JLabel("Bem vindo à ACMERobots"), BorderLayout.NORTH);
         JPanel buttonsPanel = new JPanel(new GridLayout(3, 1));
@@ -76,14 +76,14 @@ public class ACMERobots implements Serializable {
         buttonsPanel.add(salvarDados);
         buttonsPanel.add(carregarDados);
         buttonsPanel.add(finalizarSistema);
-        buttonsPanel.add(descubra);
+        buttonsPanel.add(linkRelatorio);
         panelMenu.add(buttonsPanel, BorderLayout.CENTER);
 
 
-        descubra.addActionListener(new ActionListener() {
+        linkRelatorio.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+                String url = "https://docs.google.com/document/d/1U4dxgzCUndFvGbt7BQG9Ppqnzk21QuqmTbFLhBcxG9M/edit#heading=h.pkcs5b32h5eg";
                 if (Desktop.isDesktopSupported()) {
                     try {
                         Desktop.getDesktop().browse(new URI(url));
@@ -111,7 +111,6 @@ public class ACMERobots implements Serializable {
                     clientes = (ArrayList<Cliente>) in.readObject();
                     locacoes = (ArrayList<Locacao>) in.readObject();
                     updateRoboModel();
-                    updateLocacaoModel();
                     updateClienteModel();
                     in.close();
                     fileIn.close();
@@ -131,6 +130,7 @@ public class ACMERobots implements Serializable {
                     out.writeObject(robos);
                     out.writeObject(clientes);
                     out.writeObject(locacoes);
+                    updateRoboModel();
                     out.close();
                     fileOut.close();
                     JOptionPane.showMessageDialog(frame, "Dados salvos com sucesso.", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
@@ -757,7 +757,8 @@ public class ACMERobots implements Serializable {
                         case 2:
                             String tipoStr2 = "Agrícola";
                             double area = Double.parseDouble(dado[3]);
-                            cadastrarRobo(id, modelo, tipoStr2, "", 0, area, "");
+                            String uso = dado[4];
+                            cadastrarRobo(id, modelo, tipoStr2, "", 0, area, uso);
                             break;
                         case 3:
                             String tipoStr3 = "Industrial";
@@ -830,11 +831,26 @@ public class ACMERobots implements Serializable {
                                 break;
                             }
                         }
+                        String[] idsRobosStr = dado[5].split(",");
+                        ArrayList<Robo> robosLocacao = new ArrayList<>();
+                        for (String idRobo : idsRobosStr) {
+                            int id = Integer.parseInt(idRobo);
+                            for (Robo r : robos) {
+                                if (r.getId() == id) {
+                                    robosLocacao.add(r);
+                                    break;
+                                }
+                            }
+                        }
                         if (cliente == null) {
                             JOptionPane.showMessageDialog(frame, "Cliente não encontrado.", "Erro", JOptionPane.ERROR_MESSAGE);
                             return;
                         }
-                        Locacao locacao = new Locacao(numero, dataInicio, dataFimInt, cliente, new ArrayList<>());
+                        if (robos == null) {
+                            JOptionPane.showMessageDialog(frame, "Robô não encontrado.", "Erro", JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+                        Locacao locacao = new Locacao(numero, dataInicio, dataFimInt, cliente, robosLocacao);
                         locacoes.add(locacao);
                     } catch (Exception ex) {
                         JOptionPane.showMessageDialog(frame, "Erro ao processar datas.", "Erro", JOptionPane.ERROR_MESSAGE);
@@ -857,7 +873,7 @@ public class ACMERobots implements Serializable {
 
     private void updateRoboModel() {
         roboModel.removeAllElements();
-        for (Robo r : robosDisponiveis) {
+        for (Robo r : robos) {
             roboModel.addElement(r);
         }
     }
@@ -872,13 +888,6 @@ public class ACMERobots implements Serializable {
     private void updateLocacaoModel() {
         locacaoModel.removeAllElements();
         for (Locacao l : locacoes) {
-            locacaoModel.addElement(l);
-        }
-    }
-
-    private void updateLocacaoPendenteModel() {
-        locacaoModel.removeAllElements();
-        for (Locacao l : locacoesPendentes) {
             locacaoModel.addElement(l);
         }
     }
