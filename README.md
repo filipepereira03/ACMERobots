@@ -2,7 +2,7 @@
 
 ## Descrição
 
-Este repositório contém um projeto relacionado à robótica desenvolvido em Java. O objetivo é gerenciar e controlar os robôs da empresa fictícia ACME.
+Este repositório contém um projeto desenvolvido em Java. O objetivo é gerenciar e controlar os robôs, clientes e locações da empresa fictícia ACME.
 
 ## Estrutura do Projeto
 
